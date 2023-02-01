@@ -1,120 +1,89 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { apiClient, urlApi } from '../../api/axios-config';
+import swal from 'sweetalert';
+import ProfileTop from '../../components/profileTop.vue';
 
 let showAll = ref(true);
 let showBelumBayar = ref(false);
 let ShowSelesai = ref(false);
-const row = reactive({
+const rowInvoice = reactive({
   items: [],
 });
-const getMenu = async () => {
-  const { data } = await apiClient.get('/menu');
-  row.items = data.data;
+const getInvoice = async () => {
+  const { data } = await apiClient.get('/invoice');
+  rowInvoice.items = data.data;
+};
+const deleteInvoice = async (id) => {
+  swal({
+    title: 'Yakin ?',
+    text: `Apakah kamu yakin untuk menghapus transaksi  ini!`,
+    icon: 'warning',
+    buttons: ['tidak', 'hapus'],
+    dangerMode: true,
+  }).then(async (willDelete) => {
+    if (willDelete) {
+      const { data } = await apiClient.delete(`/invoice/${id}`);
+      swal(`Transaksi berhasil di hapus`, {
+        icon: 'success',
+      });
+      getInvoice();
+    }
+  });
 };
 onMounted(() => {
-  getMenu();
+  getInvoice();
 });
-let showAllFunc = () => {
-  showAll.value = true;
-  showBelumBayar.value = false;
-  ShowSelesai.value = false;
-  getMenu();
-};
-let showBelumBayarFunc = () => {
-  showAll.value = false;
-  showBelumBayar.value = true;
-  ShowSelesai.value = false;
-};
-let showSelesaiFunc = () => {
-  showAll.value = false;
-  showBelumBayar.value = false;
-  ShowSelesai.value = true;
-};
 </script>
 <template>
-  <div class="transaksi">
-    <div class="transaksi-head">
-      <div @click="showAllFunc" :class="{ active: showAll }" class="transaksi-head-item">semua</div>
-      <div @click="showBelumBayarFunc" :class="{ active: showBelumBayar }" class="transaksi-head-item">belum bayar</div>
-      <div @click="showSelesaiFunc" :class="{ active: ShowSelesai }" class="transaksi-head-item">selesai</div>
+  <ProfileTop />
+  <h4 class="fw-bold py-3 my-4">
+    <span class="text-muted fw-light"><a href="/dashboard" class="text-muted fw-normal">Dashboard </a>/</span> Transaksi
+  </h4>
+
+  <div class="card">
+    <h5 class="card-header">Transaksi</h5>
+    <div class="table-responsive text-nowrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>id pesanan</th>
+            <th>id menu</th>
+            <th>jumlah_pesanan</th>
+            <th>total harga</th>
+            <th>Tanggal / waktu</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in rowInvoice.items" :key="index">
+            <td>{{ item.id }}</td>
+            <td>
+              <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id_pesanan }}</strong>
+            </td>
+            <td>{{ item.id_menu }}</td>
+            <td>{{ item.jumlah_pesanan }}</td>
+            <td>Rp {{ item.total_harga }}k</td>
+            <td>
+              {{ item.created_at }} /
+              <p class="text-warning">{{ item.created_at_time }}</p>
+            </td>
+            <td>
+              <div class="dropdown">
+                <button @click="toggleActionTable = true" type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                  <i class="bx bx-dots-vertical-rounded"></i>
+                </button>
+                <div class="dropdown-menu">
+                  <button class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
+                  <button class="dropdown-item" @click="deleteInvoice(item.id)"><i class="bx bx-trash me-1"></i> Delete</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div v-if="showAll" class="table">
-      <div class="table-wrapper">
-        <div class="table-head">
-          <div class="table-head-item">No</div>
-          <div class="table-head-item">Nama</div>
-          <div class="table-head-item">cover</div>
-          <div class="table-head-item">kategori</div>
-          <div class="table-head-item">deskripsi</div>
-        </div>
-        <div class="table-content">
-          <div v-for="(item, index) in row.items" :key="index" class="table-content-item">
-            <div class="table-content-item-col">{{ item.id }}</div>
-            <div class="table-content-item-col">{{ item.nama }}</div>
-            <div class="table-content-item-col">{{ item.cover }}</div>
-            <div class="table-content-item-col">{{ item.kategori }}</div>
-            <div class="table-content-item-col">{{ item.deskripsi }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div v-if="showBelumBayar" class="table">hello from belum bayar</div>
-    <div v-if="ShowSelesai" class="table">hello from selesai</div>
   </div>
 </template>
-<style lang="scss">
-.transaksi {
-  padding: 2rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 2rem rgba(grey, 0.3);
-  &-head {
-    display: flex;
-    padding: 1rem 0;
-    &-item {
-      width: 100%;
-      font-size: 1.6rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-
-      &.active {
-        background-color: lightblue;
-      }
-    }
-  }
-  & .table {
-    width: -webkit-fill-available;
-    &-wrapper {
-      width: 100%;
-    }
-    &-head {
-      border-bottom: solid 1px;
-      background-color: lightgrey;
-      width: -webkit-fill-available;
-      display: flex;
-      &-item {
-        width: 100%;
-
-        padding: 0.7rem 1rem;
-        font-size: 1.6rem;
-        text-align: center;
-      }
-    }
-    &-content {
-      width: -webkit-fill-available;
-      &-item {
-        width: 100%;
-        display: flex;
-        &-col {
-          width: 100%;
-          padding: 0.7rem 1rem;
-          font-size: 1.6rem;
-          text-align: center;
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss"></style>

@@ -5,7 +5,7 @@ import '/src/assets/admin/vendor/fonts/boxicons.css';
 import '/src/assets/admin/vendor/css/theme-default.css';
 import '/src/assets/admin/css/demo.css';
 import '/src/assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css';
-// import '/src/assets/admin/vendor/libs/apex-charts/apexcharts.css';
+import '/src/assets/admin/vendor/js/bootstrap.js';
 </script>
 <template>
   <div class="dashboard">
@@ -19,11 +19,8 @@ import '/src/assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css';
 .dashboard {
   &-content {
     margin-left: 260px;
-    // margin-top: 7rem;
-
     padding: 2rem;
     min-height: calc(100vh - 7rem);
-
     height: -webkit-fill-available;
     width: -webkit-fill-available;
     background-color: var(--color-section);

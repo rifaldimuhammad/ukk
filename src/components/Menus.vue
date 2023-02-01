@@ -27,7 +27,6 @@ defineProps({
     gap: 1rem;
     flex-direction: column;
     border-radius: 1rem;
-    // border: solid 2px var(--color-grey-2);
     background-color: white;
     box-shadow: 0 60px 44px -49px rgba(grey, 0.2);
 

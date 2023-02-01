@@ -2,11 +2,11 @@
 import Icons from '../../components/Icons.vue';
 import { apiClient, urlApi } from '../../api/axios-config';
 import { onMounted, reactive, ref } from 'vue';
-import Menus from '../../components/Menus.vue';
+import ProfileTop from '/src/components/ProfileTop.vue';
 import swal from 'sweetalert';
+
 let toggleLoadMenu = ref(false);
 let togglePopupDetail = ref(false);
-// let toggleAlert = ref(false);
 const row = reactive({
   items: [],
 });
@@ -20,7 +20,7 @@ let dataAlert = reactive({
 let formDataMenu = reactive({
   nama: '',
   harga: '',
-  cover: '/src/assets/img/emptyImage.svg',
+  cover: '',
   kategori: '',
   deskripsi: '',
 });
@@ -66,16 +66,47 @@ const addMenu = async () => {
   fields.append('cover', formDataMenu.cover);
   fields.append('kategori', formDataMenu.kategori);
   fields.append('deskripsi', formDataMenu.deskripsi);
-  const { data } = await apiClient.post('/menu', fields);
-  swal({
-    title: 'Berhasil',
-    text: 'Menu Berhasil Di Tambahkan',
-    icon: 'success',
-    button: 'Aww yiss!',
-  });
-  getMenu();
+  if (formDataMenu.cover == '') {
+    swal({
+      title: 'Upload Gambar Menu',
+      icon: 'warning',
+    });
+  } else {
+    const { data } = await apiClient.post('/menu', fields);
+    swal({
+      title: 'Berhasil',
+      text: 'Menu Berhasil Di Tambahkan',
+      icon: 'success',
+      button: 'Aww yiss!',
+    });
+    getMenu();
+  }
 };
-
+const updateMenu = async () => {
+  console.log(dataMenuDetail);
+  const fieldsEdit = new FormData();
+  fieldsEdit.append('nama', dataMenuDetail.nama);
+  fieldsEdit.append('harga', dataMenuDetail.harga);
+  fieldsEdit.append('cover', dataMenuDetail.cover);
+  fieldsEdit.append('kategori', dataMenuDetail.kategori);
+  fieldsEdit.append('deskripsi', dataMenuDetail.deskripsi);
+  if (dataMenuDetail.cover == '') {
+    swal({
+      icon: 'warning',
+      title: 'isi foto',
+    });
+  } else {
+    const { data } = await apiClient.post(`/menu/${dataMenuDetail.id}?_method=PUT`, fieldsEdit);
+    togglePopupDetail.value = false;
+    await swal({
+      title: 'Berhasil',
+      text: 'Menu Berhasil Di Ubah',
+      icon: 'success',
+      button: 'Aww yiss!',
+    });
+    getMenu();
+  }
+};
 const deleteMenu = async (id) => {
   swal({
     title: 'Yakin ?',
@@ -94,13 +125,15 @@ const deleteMenu = async (id) => {
     }
   });
 };
+
 onMounted(() => {
   getMenu();
   getKategori();
 });
 </script>
 <template>
-  <h4 class="fw-bold py-3 mb-4">
+  <ProfileTop />
+  <h4 class="fw-bold py-3 my-4">
     <span class="text-muted fw-light"> <RouterLink class="text-muted fw-normal" :to="{ name: 'dashboard' }">Dashboard </RouterLink>/</span> Menu
   </h4>
   <form @submit.prevent="addMenu()" class="card mb-4">
@@ -108,14 +141,14 @@ onMounted(() => {
     <div class="card-body">
       <div class="mb-3">
         <div class="d-flex align-items-start align-items-sm-center gap-4">
-          <img src="/src/assets/img/burger.png" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+          <img :src="formDataMenu.cover" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
           <div class="button-wrapper">
             <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
               <span class="d-none d-sm-block">Upload new photo</span>
               <i class="bx bx-upload d-block d-sm-none"></i>
               <input type="file" v-on:change="onInputCoverChange" name="cover" id="upload" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
             </label>
-            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+            <button type="reset" class="btn btn-outline-secondary account-image-reset mb-4">
               <i class="bx bx-reset d-block d-sm-none"></i>
               <span class="d-none d-sm-block">Reset</span>
             </button>
@@ -148,20 +181,23 @@ onMounted(() => {
 
   <div class="dashboard-menu">
     <div class="menu" v-for="item in row.items">
-      <div v-if="toggleLoadMenu == true" class="pre-menu">
-        <div class="pre-menu-top loader-content flex flex-wrap" style="height: 20rem; width: 100%; margin-bottom: 1rem"></div>
+      <div v-if="toggleLoadMenu" class="pre-menu">
+        <div class="pre-menu-top loader-content flex flex-wrap" style="height: 10rem; width: 10rem; margin-bottom: 1rem"></div>
         <div class="pre-menu-bot flex flex-between" style="gap: 2rem">
-          <div class="pre-menu-bot-1 loader-content" style="height: 2rem; width: 10rem"></div>
-          <div class="pre-menu-bot-2 loader-content" style="height: 2rem; width: 10rem"></div>
+          <div class="pre-menu-bot-1 loader-content" style="height: 2rem; width: 4rem"></div>
+          <div class="pre-menu-bot-2 loader-content" style="height: 2rem; width: 4rem"></div>
         </div>
       </div>
-      <Menus v-if="toggleLoadMenu == false" :name="item.nama" :price="item.harga" :img="item.cover" @click="setDataMenuDetail(item.id, item.nama, item.harga, item.cover, item.kategori, item.deskripsi)" />
+
+      <div v-if="toggleLoadMenu == false" class="menu-wrapper" @click="setDataMenuDetail(item.id, item.nama, item.harga, item.cover, item.kategori, item.deskripsi)">
+        <div class="menu-wrapper-img asset-bg" :style="{ background: `url(${urlApi + item.cover})` }"></div>
+      </div>
     </div>
   </div>
   <Transition>
     <div class="modal fade show" v-if="togglePopupDetail" style="display: block; background-color: var(--bs-gray-dark)">
       <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content">
+        <form @submit.prevent="updateMenu()" class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalCenterTitle">Modal title</h5>
             <button @click="togglePopupDetail = false" type="button" class="btn-close"></button>
@@ -169,7 +205,7 @@ onMounted(() => {
           <div class="modal-body">
             <div class="mb-3">
               <div class="d-flex align-items-start align-items-sm-center gap-4">
-                <img src="/src/assets/img/burger.png" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+                <img :src="urlApi + dataMenuDetail.cover" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
                 <div class="button-wrapper">
                   <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
                     <span class="d-none d-sm-block">Upload new photo</span>
@@ -216,190 +252,8 @@ onMounted(() => {
       </div>
     </div>
   </Transition>
-  <!-- <Transition>
-    <div class="form-detail" v-if="togglePopupDetail">
-      <div class="form-detail-wrapper">
-        <div class="form-detail-head">
-          <p>Detail Menu</p>
-          <span @click="togglePopupDetail = false">
-            <Icons name="close" />
-          </span>
-        </div>
-
-        <div class="form-detail-info">
-          <div class="form-detail-info-left">
-            <div class="form-detail-info-left-img" :style="{ background: `url(${urlApi + dataMenuDetail.cover})` }"></div>
-          </div>
-          <div class="form-detail-info-right">
-            <div class="form-detail-info-right-btn">
-              <label for="inputCover">add new poto</label>
-              <input type="file" v-on:change="onInputCoverDetailChange" name="cover" id="inputCover" />
-              <button @click="deleteMenu(dataMenuDetail.id)">Delete menu</button>
-            </div>
-            <div class="form-detail-info-right-btn-valid">Allowed PNG or JPEG. Max size of 800K</div>
-          </div>
-        </div>
-        <div class="alert alert-yellow">
-          <div class="alert-icon"><Icons name="alert" /></div>
-          <div class="alert-desc">Your email is not confirmed. Please check your inbox.</div>
-          <div class="alert-close"><Icons name="close" /></div>
-        </div>
-
-        <form @submit.prevent="addMenu()" class="form-detail-fill">
-          <div class="form-detail-fill-wrapper">
-            <div class="form-detail-fill-item">
-              <label>nama</label>
-              <input type="text" name="nama" v-model="dataMenuDetail.nama" />
-            </div>
-            <div class="form-detail-fill-item">
-              <label>harga</label>
-              <input type="number" name="harga" v-model="dataMenuDetail.harga" />
-            </div>
-            <div class="form-detail-fill-item">
-              <select name="kategori" required v-model="dataMenuDetail.kategori">
-                <option v-for="item in rowKategori.items" :value="item.nama">{{ item.nama }}</option>
-              </select>
-            </div>
-            <div class="form-detail-fill-item">
-              <label>deskripsi</label>
-              <input type="text" name="deskripsi" v-model="dataMenuDetail.deskripsi" />
-            </div>
-          </div>
-          <div class="form-detail-fill-btn">
-            <button type="submit">submit</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </Transition> -->
 </template>
 <style lang="scss">
-.form {
-  padding: 2rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 2rem rgba(grey, 0.3);
-  margin-bottom: 2rem;
-  &-wrapper {
-  }
-  &-info {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem 0;
-    &-left {
-      &-img {
-        height: 12rem;
-        width: 12rem;
-        background-size: cover !important;
-        background-position: center !important;
-      }
-    }
-    &-right {
-      display: flex;
-      flex-direction: column;
-      gap: 1.4rem;
-      &-btn {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-
-        #inputCover {
-          display: none;
-        }
-        label,
-        button {
-          border-radius: 0.5rem;
-          border: none;
-          background: unset;
-          text-transform: uppercase;
-          font-size: 1.6rem;
-          font-weight: 500;
-          cursor: pointer;
-          &:nth-child(1) {
-            padding: 1rem 3rem;
-            background-color: var(--color-admin-blue);
-            color: white;
-            box-shadow: 4px 4px 2rem rgba(grey, 0.2);
-            border: solid 1px var(--color-admin-blue);
-          }
-          &:nth-child(3) {
-            padding: 1rem 2rem;
-            border: rgba(red, 0.5) solid 1px;
-            color: red;
-          }
-        }
-      }
-      &-valid {
-      }
-    }
-  }
-  &-fill {
-    margin-top: 3rem;
-    &-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-    }
-    &-item {
-      width: -webkit-fill-available;
-      position: relative;
-      & label {
-        font-size: 1.6rem;
-        text-transform: capitalize;
-        position: absolute;
-        top: -1.4rem;
-        left: 1rem;
-        padding: 0 1rem;
-        background-color: white;
-        z-index: 1;
-        color: rgba(grey, 0.5);
-      }
-      & input,
-      & select {
-        width: -webkit-fill-available;
-        padding: 1.6rem;
-        border-radius: 0.6rem;
-        outline: none;
-        border: solid 1px rgba(grey, 0.5);
-        font-size: 1.6rem;
-        text-transform: capitalize;
-        color: var(--color-black);
-        font-weight: 500;
-        &::placeholder {
-          color: rgba(grey, 0.5);
-        }
-      }
-    }
-    &-btn {
-      margin-top: 3rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      button {
-        border-radius: 0.5rem;
-        border: none;
-        background: unset;
-        text-transform: uppercase;
-        font-size: 1.6rem;
-        font-weight: 500;
-        cursor: pointer;
-        &:nth-child(1) {
-          padding: 1rem 3rem;
-          background-color: var(--color-admin-blue);
-          color: white;
-          box-shadow: 4px 4px 2rem rgba(grey, 0.2);
-          border: solid 1px var(--color-admin-blue);
-        }
-        &:nth-child(2) {
-          padding: 1rem 2rem;
-          border: rgba(red, 0.5) solid 1px;
-          color: red;
-        }
-      }
-    }
-  }
-}
 .dashboard-menu {
   display: flex;
   flex-wrap: wrap;
@@ -409,9 +263,14 @@ onMounted(() => {
 }
 .menu {
   &-wrapper {
+    border-radius: 1rem;
+    background-color: white;
+    box-shadow: 0 60px 44px -49px rgba(grey, 0.2);
+    padding: 1rem;
     &-img {
-      padding: 2rem;
-      height: 20rem;
+      height: 10rem;
+      width: 10rem;
+      padding: 1rem;
     }
   }
 }

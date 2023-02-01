@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      children: [
+      children: [ 
         {
           path: '/category=:category',
           name: 'homeCategory',

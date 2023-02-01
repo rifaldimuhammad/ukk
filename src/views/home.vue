@@ -6,8 +6,10 @@ import { apiClient, urlApi } from '../api/axios-config';
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Header from '../components/Header.vue';
+import swal from 'sweetalert';
 let router = useRouter();
 let route = useRoute();
+
 let goDetail = (id, name) => {
   router.push({ name: 'detailMenu', params: { id: id, name: name } });
 };
@@ -15,7 +17,6 @@ let goDetail = (id, name) => {
 let toggleLoadMenu = ref(false);
 let togglePopupDetail = ref(false);
 let toggleMenuEmpty = ref(false);
-let toggleAlertAddCart = ref(false);
 
 const row = reactive({
   items: [],
@@ -26,17 +27,20 @@ const rowKategori = reactive({
 const rowCart = reactive({
   items: [],
 });
+
 let popupDetailData = reactive({
   id: '',
   nama: '',
   harga: 0,
   cover: '',
-  jumlah: 0,
+  jumlah: 1,
   total: 0,
 });
 let formAddCart = reactive({
-  nama: '',
-  cover: '',
+  id_menu: '',
+  // nama: '',
+  // cover: '',
+  // harga: '',
   jumlah_menu: '',
   total_harga: '',
 });
@@ -55,6 +59,7 @@ const getKategori = async () => {
 const getCart = async () => {
   const { data } = await apiClient.get(`/pesanan`);
   rowCart.items = data.data;
+  rowCart.items.map(async (e) => {});
 };
 const getMenuByCat = async (cat) => {
   await router.push({ name: 'homeCategory', params: { category: cat } });
@@ -70,19 +75,25 @@ const getMenuByCat = async (cat) => {
 };
 
 const addToCart = async () => {
-  formAddCart.nama = popupDetailData.nama;
-  formAddCart.cover = popupDetailData.cover;
+  formAddCart.id_menu = popupDetailData.id;
+  // formAddCart.nama = popupDetailData.nama;
+  // formAddCart.cover = popupDetailData.cover;
+  // formAddCart.harga = popupDetailData.harga;
   formAddCart.jumlah_menu = popupDetailData.jumlah;
   formAddCart.total_harga = popupDetailData.harga * popupDetailData.jumlah;
   if (formAddCart.jumlah_menu > 0) {
     const { data } = await apiClient.post('/pesanan', formAddCart);
-    toggleAlertAddCart.value = true;
+    swal({
+      icon: 'success',
+      title: `${popupDetailData.jumlah} menu ${popupDetailData.nama} berhasil di tambahkan `,
+    });
+
     getCart();
-    setTimeout(() => {
-      toggleAlertAddCart.value = false;
-    }, 3000);
   } else {
-    alert('jumlah menu tidak boleh kosong');
+    swal({
+      icon: 'warning',
+      title: `Jumlah Menu Tidak Boleh Kosong`,
+    });
   }
 };
 
@@ -96,11 +107,6 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div v-if="toggleAlertAddCart" class="alert alert-fixed alert-green">
-    <div class="alert-icon"><Icons name="alert" /></div>
-    <div class="alert-desc">{{ popupDetailData.jumlah }} {{ popupDetailData.nama }} telah di tambahkan ke keranjang</div>
-    <div class="alert-close"><Icons name="close" /></div>
-  </div>
   <Header :total-cart="rowCart.items.length"></Header>
   <div class="home">
     <div class="home-wrapper">
