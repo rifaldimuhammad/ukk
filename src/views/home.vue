@@ -38,9 +38,8 @@ let popupDetailData = reactive({
 });
 let formAddCart = reactive({
   id_menu: '',
-  // nama: '',
-  // cover: '',
-  // harga: '',
+  id_user: '',
+  harga: '',
   jumlah_menu: '',
   total_harga: '',
 });
@@ -76,18 +75,17 @@ const getMenuByCat = async (cat) => {
 
 const addToCart = async () => {
   formAddCart.id_menu = popupDetailData.id;
-  // formAddCart.nama = popupDetailData.nama;
-  // formAddCart.cover = popupDetailData.cover;
-  // formAddCart.harga = popupDetailData.harga;
+  formAddCart.id_user = 1;
+  formAddCart.harga_menu = popupDetailData.harga;
   formAddCart.jumlah_menu = popupDetailData.jumlah;
-  formAddCart.total_harga = popupDetailData.harga * popupDetailData.jumlah;
+  formAddCart.total_harga = popupDetailData.harga;
+
   if (formAddCart.jumlah_menu > 0) {
     const { data } = await apiClient.post('/pesanan', formAddCart);
     swal({
       icon: 'success',
       title: `${popupDetailData.jumlah} menu ${popupDetailData.nama} berhasil di tambahkan `,
     });
-
     getCart();
   } else {
     swal({

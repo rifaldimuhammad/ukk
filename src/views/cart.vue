@@ -29,7 +29,6 @@ let rowInvoice = reactive({
 const getMenu = async (id) => {
   const { data } = await apiClient.get(`/menu/${id}`);
   rowMenu.items.push(data.data);
-  console.log(rowMenu);
 };
 const getCart = async () => {
   const { data } = await apiClient.get(`/pesanan`);
@@ -43,9 +42,7 @@ const getCart = async () => {
   });
   rowCart.items.map(async (e) => {
     arrTotal.total += parseInt(e.total_harga);
-    getMenu(e.id_menu);
   });
-  console.log(rowCart);
 };
 
 const deleteCart = async (id) => {
@@ -109,17 +106,13 @@ onMounted(() => {
     <div class="cart-content">
       <div v-for="(item, index) in rowCart.items" class="cart-content-item">
         <div class="cart-content-item-img">
-          <img :src="urlApi + rowMenu.items[index].cover" :alt="rowMenu.items[index].cover" class="cart-content-item-img-src" />
+          <img :src="urlApi + item.cover_menu" :alt="item.cover_menu" class="cart-content-item-img-src" />
         </div>
         <div class="cart-content-item-info">
-          <div class="cart-content-item-info-1">{{ rowMenu.items[index].nama }}</div>
+          <div class="cart-content-item-info-1">{{ item.nama_menu }}</div>
           <div class="cart-content-item-info-2">100g</div>
           <div class="cart-content-item-info-3">
-            <div class="menu-value">
-              <span @click="item.jumlah_menu--"><Icons name="minus" /></span>
-              <input v-model="item.jumlah_menu" type="number" max="10" name="" id="" />
-              <span @click="item.jumlah_menu++"> <Icons name="add" /> </span>
-            </div>
+            jumlah : {{ item.jumlah_menu }}
             <div class="cart-content-item-info-3-price">Rp {{ item.total_harga }}</div>
           </div>
         </div>
@@ -164,7 +157,7 @@ onMounted(() => {
           </div>
 
           <div v-for="(item, index) in rowInvoice.pesanan" :key="index" class="invoice-content-table-info">
-            <div class="invoice-content-table-info-item grow">{{ item.nama }}</div>
+            <div class="invoice-content-table-info-item grow">{{ item.nama_menu }}</div>
             <div class="invoice-content-table-info-item">{{ item.id_menu }}</div>
             <div class="invoice-content-table-info-item">Rp {{ item.harga }}k</div>
             <div class="invoice-content-table-info-item">{{ item.jumlah_menu }}</div>

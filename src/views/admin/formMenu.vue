@@ -43,10 +43,12 @@ let setDataMenuDetail = (id, nama, harga, cover, kategori, deskripsi) => {
 };
 const onInputCoverChange = (e) => {
   let path = (formDataMenu.cover = e.target.files[0]);
+  getImg(e);
 };
 const onInputCoverDetailChange = (e) => {
   let path = (dataMenuDetail.cover = e.target.files[0]);
 };
+
 const getKategori = async () => {
   const { data } = await apiClient.get('/kategori');
   rowKategori.items = data.data;
@@ -126,6 +128,17 @@ const deleteMenu = async (id) => {
   });
 };
 
+let urlImg = ref('/src/assets/img/emptyImage.svg');
+let getImg = (e) => {
+  const files = e.target.files[0];
+  if (files) {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(files);
+    fileReader.addEventListener('load', function () {
+      urlImg.value = this.result;
+    });
+  }
+};
 onMounted(() => {
   getMenu();
   getKategori();
@@ -141,14 +154,14 @@ onMounted(() => {
     <div class="card-body">
       <div class="mb-3">
         <div class="d-flex align-items-start align-items-sm-center gap-4">
-          <img :src="formDataMenu.cover" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+          <img :src="urlImg" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="border: var(--bs-secondary) solid 1px" />
           <div class="button-wrapper">
             <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
               <span class="d-none d-sm-block">Upload new photo</span>
               <i class="bx bx-upload d-block d-sm-none"></i>
               <input type="file" v-on:change="onInputCoverChange" name="cover" id="upload" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
             </label>
-            <button type="reset" class="btn btn-outline-secondary account-image-reset mb-4">
+            <button type="reset" @click="urlImg = '/src/assets/img/emptyImage.svg'" class="btn btn-outline-secondary account-image-reset mb-4">
               <i class="bx bx-reset d-block d-sm-none"></i>
               <span class="d-none d-sm-block">Reset</span>
             </button>
