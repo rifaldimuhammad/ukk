@@ -1,4 +1,9 @@
-<script setup></script>
+<script setup>
+import { useRoute, useRouter } from 'vue-router';
+
+let router = useRouter();
+let route = useRoute();
+</script>
 <template>
   <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" style="max-width: 100%; width: 100% !important" id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -6,7 +11,6 @@
         <i class="bx bx-menu bx-sm"></i>
       </a>
     </div>
-
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
       <!-- Search -->
       <div class="navbar-nav align-items-center">
@@ -36,7 +40,7 @@
                 <div class="d-flex">
                   <div class="flex-shrink-0 me-3">
                     <div class="avatar avatar-online">
-                      <img src="/src/assets/img/burger.png" alt="" class="w-px-40 h-auto rounded-circle" />
+                      <img src="/src/assets/img/profile.png" alt="" class="w-px-40 h-auto rounded-circle" />
                     </div>
                   </div>
                   <div class="flex-grow-1">
@@ -50,38 +54,22 @@
               <div class="dropdown-divider"></div>
             </li>
             <li>
-              <a class="dropdown-item" href="#">
+              <RouterLink :to="{ name: 'dashboardUser' }" class="dropdown-item">
                 <i class="bx bx-user me-2"></i>
                 <span class="align-middle">My Profile</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">
-                <i class="bx bx-cog me-2"></i>
-                <span class="align-middle">Settings</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">
-                <span class="d-flex align-items-center align-middle">
-                  <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                  <span class="flex-grow-1 align-middle">Billing</span>
-                  <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                </span>
-              </a>
+              </RouterLink>
             </li>
             <li>
               <div class="dropdown-divider"></div>
             </li>
             <li>
-              <a class="dropdown-item" href="auth-login-basic.html">
+              <a class="dropdown-item" href="">
                 <i class="bx bx-power-off me-2"></i>
                 <span class="align-middle">Log Out</span>
               </a>
             </li>
           </ul>
         </li>
-        <!--/ User -->
       </ul>
     </div>
   </nav>

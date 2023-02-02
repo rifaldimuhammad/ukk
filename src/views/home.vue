@@ -131,8 +131,7 @@ onMounted(() => {
       </div>
       <div class="title-link">
         <div class="title-link-wrapper">
-          <div class="title-link-wrapper-text">top categories</div>
-          <div class="title-link-wrapper-link">View All <Icons name="right" /></div>
+          <div class="title-link-wrapper-text">top Menu</div>
         </div>
       </div>
       <div class="home-menu">

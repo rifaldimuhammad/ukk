@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      children: [ 
+      children: [
         {
           path: '/category=:category',
           name: 'homeCategory',
@@ -35,6 +35,11 @@ const router = createRouter({
           path: '/dashboard',
           name: 'dashboard',
           component: () => import('../views/admin/dashboard.vue'),
+        },
+        {
+          path: '/dashboard/user',
+          name: 'dashboardUser',
+          component: () => import('../views/admin/user.vue'),
         },
 
         {

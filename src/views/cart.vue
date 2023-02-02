@@ -26,10 +26,7 @@ let rowInvoice = reactive({
   fullJumlah: 0,
   fullTotal: 0,
 });
-const getMenu = async (id) => {
-  const { data } = await apiClient.get(`/menu/${id}`);
-  rowMenu.items.push(data.data);
-};
+
 const getCart = async () => {
   const { data } = await apiClient.get(`/pesanan`);
   rowCart.items = data.data;
@@ -150,7 +147,6 @@ onMounted(() => {
           <p></p>
           <div class="invoice-content-table-head">
             <div class="invoice-content-table-head-item grow">Nama</div>
-            <div class="invoice-content-table-head-item">id menu</div>
             <div class="invoice-content-table-head-item">Harga</div>
             <div class="invoice-content-table-head-item">Jumlah</div>
             <div class="invoice-content-table-head-item">Total Harga</div>
@@ -158,8 +154,7 @@ onMounted(() => {
 
           <div v-for="(item, index) in rowInvoice.pesanan" :key="index" class="invoice-content-table-info">
             <div class="invoice-content-table-info-item grow">{{ item.nama_menu }}</div>
-            <div class="invoice-content-table-info-item">{{ item.id_menu }}</div>
-            <div class="invoice-content-table-info-item">Rp {{ item.harga }}k</div>
+            <div class="invoice-content-table-info-item">Rp {{ item.harga_menu }}k</div>
             <div class="invoice-content-table-info-item">{{ item.jumlah_menu }}</div>
             <div class="invoice-content-table-info-item">Rp {{ item.total_harga }}k</div>
           </div>
