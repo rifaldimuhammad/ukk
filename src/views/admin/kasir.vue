@@ -6,6 +6,7 @@ import Icons from '../../components/Icons.vue';
 import ValueJumlah from '../../components/ValueJumlah.vue';
 import { useRoute, useRouter } from 'vue-router';
 import swal from 'sweetalert';
+import { value } from 'dom7';
 let router = useRouter();
 let route = useRoute();
 let toggleLoadMenu = ref(false);
@@ -13,6 +14,7 @@ let toggleToCart = ref(false);
 let toggleToMenu = ref(true);
 let toggleModelJumlah = ref(false);
 let toggleModalInvoice = ref(false);
+let toggleModalImgMenu = ref(false);
 let rowMenu = reactive({
   items: [],
 });
@@ -40,6 +42,7 @@ let formAddCart = reactive({
 let arrTotal = reactive({
   total: 0,
 });
+let rowPopupImg = reactive({ cover: '' });
 
 const getMenu = async () => {
   toggleLoadMenu.value = true;
@@ -121,6 +124,15 @@ const deleteCart = async (id) => {
   });
 };
 
+// document.addEventListener('click', (e) => {
+//   if (!document.querySelector('.content-popup-img-menu').contains(e.target)) {
+//     // $('.modal-content-popup-img-menu').removeClass('trans-modal-invoice-100');
+//     console.log(toggleModalImgMenu.value);
+//   } else {
+//     console.log(toggleModalImgMenu.value);
+//   }
+// });
+
 onMounted(() => {
   getMenu();
   getCart();
@@ -155,8 +167,8 @@ onMounted(() => {
           <input type="text" placeholder="Search..." class="border-0 w-100 bg-dark text-white" />
         </div>
       </div>
-      <div class="d-flex gap-3 mx-4">
-        <RouterLink :to="{ name: 'kasir' }" @click="getMenu()" active-class="btn-dark" class="btn btn-outline-dark d-flex gap-1 align-items-center my-2">
+      <div class="d-flex gap-3 mx-4 flex-wrap my-4">
+        <RouterLink :to="{ name: 'kasir' }" @click="getMenu()" active-class="btn-dark" class="btn btn-outline-dark d-flex gap-1 align-items-center">
           <Icons name="grid" height="20px" fill="#697a8d" />
           <p class="m-0">All</p>
         </RouterLink>
@@ -166,17 +178,17 @@ onMounted(() => {
           :to="{ name: 'kasirCategory', params: { category: item.nama } }"
           @click="getMenuByCat(item.nama)"
           active-class="btn-dark"
-          class="btn btn-outline-dark d-flex gap-1 align-items-center my-2"
+          class="btn btn-outline-dark d-flex gap-1 align-items-center"
         >
           <img :src="urlApi + item.cover" :alt="item.cover" style="height: 16px; width: 16px" />
           <p class="m-0">{{ item.nama }}</p>
         </RouterLink>
       </div>
-      <div class="card-body p-4 d-flex gap-3">
+      <div class="card-body p-4 d-flex gap-3 flex-wrap">
         <div
           v-for="(item, index) in rowMenu.items"
           :key="index"
-          @click="(formAddCart.id_menu = item.id), (formAddCart.harga_menu = item.harga), (formAddCart.jumlah_menu = 1), (formAddCart.total_harga = item.harga)"
+          @click="(formAddCart.id_menu = item.id), (formAddCart.harga_menu = item.harga), (formAddCart.jumlah_menu = 1), (formAddCart.total_harga = item.harga), (rowPopupImg.cover = item.cover)"
           class="card h-100 shadow-sm d-flex justify-content-center p-4 cursor-pointer"
           style="width: fit-content"
         >
@@ -185,7 +197,7 @@ onMounted(() => {
             <div class="pre-menu-bot loader-content" style="height: 30px; width: 100%"></div>
           </div>
           <div v-else class="d-flex flex-column">
-            <div class="card-img-top" :style="{ background: `url(${urlApi + item.cover})` }"></div>
+            <div class="card-img-top" @click="toggleModalImgMenu = true" :style="{ background: `url(${urlApi + item.cover})` }"></div>
             <div class="mt-3">
               <p class="card-title text-dark">{{ item.nama }}</p>
               <h5 class="card-text">Rp {{ item.harga }}.000</h5>
@@ -193,6 +205,19 @@ onMounted(() => {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- popup img menu -->
+    <div
+      class="modal-content h-100 fixed-top modal-content-popup-img-menu"
+      :class="toggleModalImgMenu ? 'trans-modal-invoice-0' : 'trans-modal-invoice-100'"
+      style="z-index: 2000; transition: all 0.3s cubic-bezier(0.83, 0, 0.17, 1); background: rgba(0, 0, 0, 0.3)"
+      @click="toggleModalImgMenu = false"
+    >
+      
+      <div class="modal-body d-flex justify-content-center align-items-center" style="overflow: auto">
+        <img class="img-fluid w-50 content-popup-img-menu" :src="urlApi + rowPopupImg.cover" :alt="urlApi + rowPopupImg.cover" />
       </div>
     </div>
 

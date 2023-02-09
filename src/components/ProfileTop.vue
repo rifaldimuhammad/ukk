@@ -1,20 +1,22 @@
 <script setup>
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 let router = useRouter();
 let route = useRoute();
-
+const user = JSON.parse(localStorage.getItem('user_data'));
 let doLogout = () => {
-  localStorage.clear();
   router.push({ name: 'login' });
+  window.location.reload();
+  localStorage.clear();
 };
 </script>
 <template>
   <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" style="max-width: 100%; width: 100% !important" id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-      <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+      <div class="btn-nav-mobile nav-item nav-link px-0 me-xl-4">
         <i class="bx bx-menu bx-sm"></i>
-      </a>
+      </div>
     </div>
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
       <!-- Search -->
@@ -28,7 +30,7 @@ let doLogout = () => {
 
       <ul class="navbar-nav flex-row align-items-center ms-auto">
         <!-- Place this tag where you want the button to render. -->
-        <li class="nav-item lh-1 me-3">
+        <li class="nav-item lh-1 me-3 cursor-pointer">
           <span></span>
         </li>
 
@@ -36,7 +38,8 @@ let doLogout = () => {
         <li class="nav-item navbar-dropdown dropdown-user dropdown">
           <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
             <div class="avatar avatar-online">
-              <img src="/src/assets/img/burger.png" alt="" class="w-px-40 h-auto rounded-circle" />
+              <img v-if="user.cover != null" :src="user.cover" alt="" class="w-px-40 rounded-circle h-100" />
+              <img v-else src="/src/assets/img/emptyImage.svg" alt="" class="w-px-40 rounded-circle h-100" />
             </div>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
@@ -45,12 +48,13 @@ let doLogout = () => {
                 <div class="d-flex">
                   <div class="flex-shrink-0 me-3">
                     <div class="avatar avatar-online">
-                      <img src="/src/assets/img/profile.png" alt="" class="w-px-40 h-auto rounded-circle" />
+                      <img v-if="user.cover != null" :src="user.cover" alt="" class="w-px-40 h-auto rounded-circle" />
+                      <img v-else src="/src/assets/img/emptyImage.svg" alt="" class="w-px-40 h-auto rounded-circle" />
                     </div>
                   </div>
                   <div class="flex-grow-1">
-                    <span class="fw-semibold d-block">John Doe</span>
-                    <small class="text-muted">Admin</small>
+                    <span class="fw-semibold d-block text-capitalize">{{ user.name }}</span>
+                    <small class="text-muted text-capitalize">{{ user.level }}</small>
                   </div>
                 </div>
               </a>

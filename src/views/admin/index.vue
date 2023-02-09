@@ -9,20 +9,16 @@ import '/src/assets/admin/vendor/js/bootstrap.js';
 import { apiClient } from '../../api/axios-config';
 import { reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { $ } from 'dom7';
 let router = useRouter();
 
-const getUserLogin = async () => {
-  const user = JSON.parse(localStorage.getItem('user_data'));
-};
 
-// onMounted(async () => {
-//   const isLoggedIn = localStorage.getItem('data_user');
-//   if (isLoggedIn == null) {
-//     router.push({ name: 'login' });
-//   }else{
-    
-//   }
-// });
+onMounted(async () => {
+  const isLoggedIn = localStorage.getItem('data_user');
+  if (!isLoggedIn === null) {
+    router.push({ name: 'dashboard' });
+  }
+});
 </script>
 <template>
   <div class="dashboard">
@@ -41,6 +37,10 @@ const getUserLogin = async () => {
     height: -webkit-fill-available;
     width: -webkit-fill-available;
     background-color: var(--color-section);
+
+    @media (max-width: 1199.98px) {
+      margin-left: 0;
+    }
   }
 }
 </style>
