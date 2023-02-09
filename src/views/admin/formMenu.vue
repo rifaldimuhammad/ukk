@@ -7,6 +7,7 @@ import swal from 'sweetalert';
 
 let toggleLoadMenu = ref(false);
 let togglePopupDetail = ref(false);
+let toggleSwitchImgUpdate = ref(false);
 const row = reactive({
   items: [],
 });
@@ -29,6 +30,7 @@ let dataMenuDetail = reactive({
   nama: '',
   harga: '',
   cover: '',
+  coverUpdate: '',
   kategori: '',
   deskripsi: '',
 });
@@ -41,14 +43,16 @@ let setDataMenuDetail = (id, nama, harga, cover, kategori, deskripsi) => {
   dataMenuDetail.deskripsi = deskripsi;
   togglePopupDetail.value = true;
 };
+
 const onInputCoverChange = (e) => {
-  let path = (formDataMenu.cover = e.target.files[0]);
-  getImg(e);
+  formDataMenu.cover = e.target.files[0];
+  getImg(e, urlImg);
 };
 const onInputCoverDetailChange = (e) => {
-  let path = (dataMenuDetail.cover = e.target.files[0]);
+  dataMenuDetail.coverUpdate = e.target.files[0];
+  getImg(e, urlImgUpdate);
+  toggleSwitchImgUpdate.value = true;
 };
-
 const getKategori = async () => {
   const { data } = await apiClient.get('/kategori');
   rowKategori.items = data.data;
@@ -73,6 +77,11 @@ const addMenu = async () => {
       title: 'Upload Gambar Menu',
       icon: 'warning',
     });
+  } else if (document.querySelector('#upload').files.length == 0) {
+    swal({
+      title: 'Upload Ulang Gambar Menu',
+      icon: 'warning',
+    });
   } else {
     const { data } = await apiClient.post('/menu', fields);
     swal({
@@ -85,21 +94,22 @@ const addMenu = async () => {
   }
 };
 const updateMenu = async () => {
-  console.log(dataMenuDetail);
   const fieldsEdit = new FormData();
   fieldsEdit.append('nama', dataMenuDetail.nama);
   fieldsEdit.append('harga', dataMenuDetail.harga);
-  fieldsEdit.append('cover', dataMenuDetail.cover);
+  fieldsEdit.append('cover', dataMenuDetail.coverUpdate);
   fieldsEdit.append('kategori', dataMenuDetail.kategori);
   fieldsEdit.append('deskripsi', dataMenuDetail.deskripsi);
   if (dataMenuDetail.cover == '') {
     swal({
+      title: 'Upload Gambar Menu',
       icon: 'warning',
-      title: 'isi foto',
     });
   } else {
+    console.log(dataMenuDetail);
     const { data } = await apiClient.post(`/menu/${dataMenuDetail.id}?_method=PUT`, fieldsEdit);
     togglePopupDetail.value = false;
+    toggleSwitchImgUpdate.value = false;
     await swal({
       title: 'Berhasil',
       text: 'Menu Berhasil Di Ubah',
@@ -129,13 +139,14 @@ const deleteMenu = async (id) => {
 };
 
 let urlImg = ref('/src/assets/img/emptyImage.svg');
-let getImg = (e) => {
+let urlImgUpdate = ref('/src/assets/img/emptyImage.svg');
+let getImg = (e, urlVar) => {
   const files = e.target.files[0];
   if (files) {
     const fileReader = new FileReader();
     fileReader.readAsDataURL(files);
     fileReader.addEventListener('load', function () {
-      urlImg.value = this.result;
+      urlVar.value = this.result;
     });
   }
 };
@@ -201,7 +212,6 @@ onMounted(() => {
           <div class="pre-menu-bot-2 loader-content" style="height: 2rem; width: 4rem"></div>
         </div>
       </div>
-
       <div v-if="toggleLoadMenu == false" class="menu-wrapper" @click="setDataMenuDetail(item.id, item.nama, item.harga, item.cover, item.kategori, item.deskripsi)">
         <div class="menu-wrapper-img asset-bg" :style="{ background: `url(${urlApi + item.cover})` }"></div>
       </div>
@@ -218,12 +228,12 @@ onMounted(() => {
           <div class="modal-body">
             <div class="mb-3">
               <div class="d-flex align-items-start align-items-sm-center gap-4">
-                <img :src="urlApi + dataMenuDetail.cover" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+                <img :src="toggleSwitchImgUpdate ? urlImgUpdate : urlApi + dataMenuDetail.cover" alt="user-avatar" class="d-block rounded" height="100" width="100" />
                 <div class="button-wrapper">
-                  <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                  <label for="uploadUpdate" class="btn btn-primary me-2 mb-4" tabindex="0">
                     <span class="d-none d-sm-block">Upload new photo</span>
                     <i class="bx bx-upload d-block d-sm-none"></i>
-                    <input type="file" v-on:change="onInputCoverDetailChange" name="cover" id="upload" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
+                    <input type="file" v-on:change="onInputCoverDetailChange" id="uploadUpdate" name="cover" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
                   </label>
                   <button @click="deleteMenu(dataMenuDetail.id)" type="button" class="btn btn-danger mb-4">
                     <i class="bx bx-reset d-block d-sm-none"></i>

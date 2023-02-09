@@ -6,6 +6,23 @@ import '/src/assets/admin/vendor/css/theme-default.css';
 import '/src/assets/admin/css/demo.css';
 import '/src/assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css';
 import '/src/assets/admin/vendor/js/bootstrap.js';
+import { apiClient } from '../../api/axios-config';
+import { reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+let router = useRouter();
+
+const getUserLogin = async () => {
+  const user = JSON.parse(localStorage.getItem('user_data'));
+};
+
+// onMounted(async () => {
+//   const isLoggedIn = localStorage.getItem('data_user');
+//   if (isLoggedIn == null) {
+//     router.push({ name: 'login' });
+//   }else{
+    
+//   }
+// });
 </script>
 <template>
   <div class="dashboard">

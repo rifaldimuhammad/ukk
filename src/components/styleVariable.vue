@@ -129,4 +129,7 @@
 .v-leave-to {
   opacity: 0;
 }
+.table-responsive {
+  min-height: 300px;
+}
 </style>

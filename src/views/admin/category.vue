@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { apiClient, urlApi } from '../../api/axios-config';
-import ProfileTop from '../../components/profileTop.vue';
+import ProfileTop from '../../components/ProfileTop.vue';
 import swal from 'sweetalert';
 let toggleActionTable = ref(false);
 
@@ -13,6 +13,7 @@ let formAddkategori = reactive({
   cover: '',
   nama: '',
 });
+
 let onCoverChangeKategori = (e) => {
   let path = (formAddkategori.cover = e.target.files[0]);
   getImg(e);
@@ -92,7 +93,13 @@ onMounted(() => {
     </div>
   </form>
   <div class="card">
-    <h5 class="card-header">Data Kategori Menu</h5>
+    <div class="card-header d-flex gap-5 align-items-center">
+      <h5>Data Kategori Menu</h5>
+      <div class="form-control gap-5">
+        <i class="bx bx-search fs-4 lh-0"></i>
+        <input required="" type="text" name="search" class="border-0" placeholder="Search..." style="outline: none" />
+      </div>
+    </div>
     <div class="table-responsive text-nowrap">
       <table class="table">
         <thead>

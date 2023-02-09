@@ -126,6 +126,7 @@ onMounted(() => {
       <div class="cart-info-btn" @click="toggleInvoice = true">order</div>
     </div>
   </div>
+  
   <div class="invoice" v-if="toggleInvoice">
     <div class="invoice-wrapper">
       <div class="invoice-header">

@@ -2,7 +2,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { apiClient, urlApi } from '../../api/axios-config';
 import swal from 'sweetalert';
-import ProfileTop from '../../components/profileTop.vue';
+import ProfileTop from '../../components/ProfileTop.vue';
 
 let showAll = ref(true);
 let showBelumBayar = ref(false);

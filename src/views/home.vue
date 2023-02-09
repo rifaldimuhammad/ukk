@@ -79,7 +79,6 @@ const addToCart = async () => {
   formAddCart.harga_menu = popupDetailData.harga;
   formAddCart.jumlah_menu = popupDetailData.jumlah;
   formAddCart.total_harga = popupDetailData.harga;
-
   if (formAddCart.jumlah_menu > 0) {
     const { data } = await apiClient.post('/pesanan', formAddCart);
     swal({

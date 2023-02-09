@@ -3,6 +3,11 @@ import { useRoute, useRouter } from 'vue-router';
 
 let router = useRouter();
 let route = useRoute();
+
+let doLogout = () => {
+  localStorage.clear();
+  router.push({ name: 'login' });
+};
 </script>
 <template>
   <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" style="max-width: 100%; width: 100% !important" id="layout-navbar">
@@ -54,7 +59,7 @@ let route = useRoute();
               <div class="dropdown-divider"></div>
             </li>
             <li>
-              <RouterLink :to="{ name: 'dashboardUser' }" class="dropdown-item">
+              <RouterLink :to="{ name: 'dashboardAkun' }" class="dropdown-item">
                 <i class="bx bx-user me-2"></i>
                 <span class="align-middle">My Profile</span>
               </RouterLink>
@@ -63,10 +68,10 @@ let route = useRoute();
               <div class="dropdown-divider"></div>
             </li>
             <li>
-              <a class="dropdown-item" href="">
+              <button class="dropdown-item" @click="doLogout">
                 <i class="bx bx-power-off me-2"></i>
                 <span class="align-middle">Log Out</span>
-              </a>
+              </button>
             </li>
           </ul>
         </li>

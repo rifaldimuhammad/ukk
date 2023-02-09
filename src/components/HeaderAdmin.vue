@@ -4,6 +4,16 @@ import Icons from './Icons.vue';
 import { useRouter } from 'vue-router';
 let router = useRouter();
 let togglePopupProfile = ref(false);
+
+const isLoggedIn = JSON.parse(localStorage.getItem('user_data'));
+const getlevel = (value) => {
+  const user = JSON.parse(localStorage.getItem('user_data'));
+  if (isLoggedIn === null) {
+    router.push({ name: 'login' });
+  } else {
+    return value === user.level;
+  }
+};
 </script>
 <template>
   <aside id="layout-menu" class="menu-vertical menu bg-menu-theme" data-bg-class="bg-menu-theme">
@@ -24,17 +34,29 @@ let togglePopupProfile = ref(false);
 
     <ul class="menu-inner py-1 ps ps--active-y">
       <!-- Dashboard -->
-      <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item">
+      <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+        <a href="" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-home-circle"></i>
+          <div data-i18n="Analytics">Kasir</div>
+        </a>
+      </RouterLink>
+      <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Dashboard</div>
+        </a>
+      </RouterLink>
+      <RouterLink :to="{ name: 'dashboardUser' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+        <a href="" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-home-circle"></i>
+          <div data-i18n="Analytics">User</div>
         </a>
       </RouterLink>
 
       <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Halaman</span>
       </li>
-      <RouterLink :to="{ name: 'dashboardFormMenu' }" active-class="active" class="menu-item">
+      <RouterLink :to="{ name: 'dashboardFormMenu' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Menu</div>
@@ -43,7 +65,7 @@ let togglePopupProfile = ref(false);
       <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Kategori</span>
       </li>
-      <RouterLink :to="{ name: 'dashboardKategori' }" active-class="active" class="menu-item">
+      <RouterLink :to="{ name: 'dashboardKategori' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Kategori</div>
@@ -52,7 +74,7 @@ let togglePopupProfile = ref(false);
       <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Transaksi</span>
       </li>
-      <RouterLink :to="{ name: 'dashboardTransaksi' }" active-class="active" class="menu-item">
+      <RouterLink :to="{ name: 'dashboardTransaksi' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Transaksi</div>

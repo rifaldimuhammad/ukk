@@ -27,14 +27,40 @@ const router = createRouter({
       component: () => import('../views/cart.vue'),
     },
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/admin/login.vue'),
+    },
+    {
       path: '/indexDashboard',
       name: 'indexDashboard',
       component: () => import('../views/admin/index.vue'),
       children: [
         {
+          path: '/kasir',
+          name: 'kasir',
+          // meta: {
+          //   level: ['kasir'],
+          // },
+          component: () => import('../views/admin/kasir.vue'),
+
+          children: [
+            {
+              path: '/kasir/category=:category',
+              name: 'kasirCategory',
+              component: () => import('../views/admin/kasir.vue'),
+            },
+          ],
+        },
+        {
           path: '/dashboard',
           name: 'dashboard',
           component: () => import('../views/admin/dashboard.vue'),
+        },
+        {
+          path: '/dashboard/akun',
+          name: 'dashboardAkun',
+          component: () => import('../views/admin/akun.vue'),
         },
         {
           path: '/dashboard/user',
@@ -61,5 +87,15 @@ const router = createRouter({
     },
   ],
 });
+
+// router.beforeEach((to, from, next) => {
+//   const isLoggedIn = localStorage.getItem('data_user');
+//   if (isLoggedIn === null) {
+//     console.log('halaman login');
+//     next({ name: 'login' });
+//   } else {
+//     next();
+//   }
+// });
 
 export default router;
