@@ -12,12 +12,15 @@ import { useRouter } from 'vue-router';
 import { $ } from 'dom7';
 let router = useRouter();
 
-
 onMounted(async () => {
-  const isLoggedIn = localStorage.getItem('data_user');
-  if (!isLoggedIn === null) {
-    router.push({ name: 'dashboard' });
-  }
+  document.addEventListener('click', (e) => {
+    if (document.querySelector('.btn-nav-mobile').contains(e.target)) {
+      $('.layout-menu').toggleClass('trans-0');
+    }
+    if (!document.querySelector('.btn-nav-mobile').contains(e.target) && !document.querySelector('.layout-menu').contains(e.target)) {
+      $('.layout-menu').removeClass('trans-0');
+    }
+  });
 });
 </script>
 <template>

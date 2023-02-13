@@ -4,22 +4,9 @@ import Icons from './Icons.vue';
 import { useRouter } from 'vue-router';
 let router = useRouter();
 
-const isLoggedIn = JSON.parse(localStorage.getItem('user_data'));
+const user = JSON.parse(localStorage.getItem('user_data'));
 const getlevel = (value) => {
-  const user = JSON.parse(localStorage.getItem('user_data'));
-  if (isLoggedIn === null) {
-    router.push({ name: 'login' });
-  } else {
-    document.addEventListener('click', (e) => {
-      if (document.querySelector('.btn-nav-mobile').contains(e.target)) {
-        $('.layout-menu').toggleClass('trans-0');
-      }
-      if (!document.querySelector('.btn-nav-mobile').contains(e.target) && !document.querySelector('.layout-menu').contains(e.target)) {
-        $('.layout-menu').removeClass('trans-0');
-      }
-    });
-    return value === user.level;
-  }
+  return value === user.level;
 };
 
 onMounted(() => {
@@ -45,19 +32,19 @@ onMounted(() => {
 
     <ul class="menu-inner py-1 ps ps--active-y">
       <!-- Dashboard -->
-      <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+      <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Kasir</div>
         </a>
       </RouterLink>
-      <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+      <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir') || getlevel('admin')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Dashboard</div>
         </a>
       </RouterLink>
-      <RouterLink :to="{ name: 'dashboardUser' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+      <RouterLink :to="{ name: 'dashboardUser' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('admin')">
         <a href="" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">User</div>

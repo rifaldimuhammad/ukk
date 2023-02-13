@@ -102,16 +102,16 @@ const doLogin = async () => {
 
             <form id="formAuthentication" class="mb-3" @submit.prevent="doLogin">
               <div class="mb-3">
-                <label for="email" class="form-label">Email or Username</label>
-                <input type="text" class="form-control" id="email" name="email-username" placeholder="Enter your email or username" autofocus="" v-model="formData.email" />
+                <label for="email" class="form-label">Email User</label>
+                <input type="email" class="form-control" required id="email" name="email-username" placeholder="Enter your email or username" autofocus="" v-model="formData.email" />
               </div>
               <div class="mb-3 form-password-toggle">
                 <div class="d-flex justify-content-between">
                   <label class="form-label" for="password">Password</label>
                 </div>
                 <div class="input-group input-group-merge">
-                  <input v-if="toggleShowPass" type="text" id="password" class="form-control" name="password" v-model="formData.password" />
-                  <input v-else type="password" id="password" class="form-control" name="password" v-model="formData.password" />
+                  <input v-if="toggleShowPass" type="text" required id="password" class="form-control" name="password" v-model="formData.password" />
+                  <input v-else type="password" id="password" required class="form-control" name="password" v-model="formData.password" />
                   <span v-if="toggleShowPass" @click="toggleShowPass = !toggleShowPass" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                   <span v-else @click="toggleShowPass = !toggleShowPass" class="input-group-text cursor-pointer">
                     <Icons name="eye" height="14px" fill="#566a7f" />

@@ -88,14 +88,13 @@ const router = createRouter({
   ],
 });
 
-// router.beforeEach((to, from, next) => {
-//   const isLoggedIn = localStorage.getItem('data_user');
-//   if (isLoggedIn === null) {
-//     console.log('halaman login');
-//     next({ name: 'login' });
-//   } else {
-//     next();
-//   }
-// });
+router.beforeEach(async (to, from) => {
+  const isLoggedIn = localStorage.getItem('data_user');
+  // console.log(isLoggedIn);
+  if (isLoggedIn !== null) {
+    // console.log('halaman login');
+    return { name: 'login' };
+  }
+});
 
 export default router;

@@ -5,10 +5,21 @@ import ProfileTop from '../../components/ProfileTop.vue';
 import { reactive, onMounted, ref } from 'vue';
 import { apiClient, urlApi } from '../../api/axios-config';
 import Icons from '../../components/Icons.vue';
+import { useRouter } from 'vue-router';
+let router = useRouter();
 let togglePassword = ref(false);
 let toggleOnCoverChange = ref(false);
+
+let formDataUser = reactive({
+  name: '',
+  cover: '',
+  level: '',
+  email: '',
+  password: '',
+});
+
 let onCoverChangeUser = (e) => {
-  user.cover = e.target.files[0];
+  formDataUser.cover = e.target.files[0];
   toggleOnCoverChange.value = true;
   getImg(e);
 };
@@ -25,26 +36,31 @@ let getImg = (e) => {
   }
 };
 
+const getUserData = async () => {
+  if (user === null) {
+    router.push({ name: 'login' });
+  } else {
+    formDataUser.name = user.name;
+    formDataUser.cover = user.cover;
+    formDataUser.level = user.level;
+    formDataUser.email = user.email;
+  }
+};
+
 const user = JSON.parse(localStorage.getItem('user_data'));
-if (user != null) {
-}
-let formDataUser = reactive({
-  name: user.name,
-  cover: user.cover,
-  level: user.level,
-  email: user.email,
-  password: '',
-});
 
 const updateUser = async () => {
   const { data } = await apiClient.post(`/user/${user.id}?_method=PUT`, formDataUser);
 };
-onMounted(() => {});
+onMounted(() => {
+  getUserData();
+});
 </script>
 <template>
   <ProfileTop />
   <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Account Settings /</span> Account</h4>
+
     <div class="row">
       <div class="col-md-12">
         <ul class="nav nav-pills flex-column flex-md-row mb-3">
@@ -57,7 +73,7 @@ onMounted(() => {});
           <!-- Account -->
           <div class="card-body">
             <div class="d-flex align-items-start align-items-sm-center gap-4">
-              <img v-if="user.cover != null" :src="toggleOnCoverChange ? urlImg : formDataUser.cover" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+              <img v-if="formDataUser.cover != null" :src="toggleOnCoverChange ? urlImg : urlApi + formDataUser.cover" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
               <img v-else :src="toggleOnCoverChange ? urlImg : '/src/assets/img/emptyImage.svg'" class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
               <div class="button-wrapper">
                 <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
@@ -85,6 +101,10 @@ onMounted(() => {});
                 <div class="mb-3">
                   <label for="email" class="form-label">E-mail</label>
                   <input class="form-control" v-model="formDataUser.email" type="text" id="email" name="email" placeholder="john.doe@example.com" />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Level</label>
+                  <input class="form-control" v-model="formDataUser.level" type="text" readonly />
                 </div>
                 <div class="mb-3">
                   <label for="email" class="form-label">Update password</label>
