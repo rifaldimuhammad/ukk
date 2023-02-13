@@ -95,7 +95,6 @@ const addToCart = async () => {
       icon: 'success',
       title: `${formAddCart.jumlah_menu} menu  berhasil di tambahkan `,
     });
-    getCart();
     toggleModelJumlah.value = false;
     toggleToCart.value = true;
     toggleToMenu.value = false;
@@ -124,14 +123,6 @@ const deleteCart = async (id) => {
   });
 };
 
-// document.addEventListener('click', (e) => {
-//   if (!document.querySelector('.content-popup-img-menu').contains(e.target)) {
-//     // $('.modal-content-popup-img-menu').removeClass('trans-modal-invoice-100');
-//     console.log(toggleModalImgMenu.value);
-//   } else {
-//     console.log(toggleModalImgMenu.value);
-//   }
-// });
 
 onMounted(() => {
   getMenu();

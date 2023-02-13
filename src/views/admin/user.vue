@@ -5,6 +5,7 @@ import ProfileTop from '../../components/ProfileTop.vue';
 import swal from 'sweetalert';
 import Icons from '../../components/Icons.vue';
 let toggleModalAddUser = ref(false);
+let toggleLoadUser = ref(false);
 let togglePass = ref(true);
 let rowUser = reactive({
   items: [],
@@ -22,8 +23,12 @@ let onCoverAddUserChange = (e) => {
   getImg(e, urlImg);
 };
 const getUser = async () => {
+  toggleLoadUser.value = true;
   const { data } = await apiClient.get('/user');
   rowUser.items = data.data;
+  setTimeout(() => {
+    toggleLoadUser.value = false;
+  }, 500);
 };
 const addUser = async () => {
   const fields = new FormData();
@@ -96,7 +101,14 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody class="table-border-bottom-0">
-          <tr v-for="(item, index) in rowUser.items" :key="index">
+          <tr v-if="toggleLoadUser" class="position-relative">
+            <td style="position: absolute; top: 50%; left: 50%; transform: translate(-50%)">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading... </span>
+              </div>
+            </td>
+          </tr>
+          <tr v-else v-for="(item, index) in rowUser.items" :key="index">
             <td>
               <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id }}</strong>
             </td>

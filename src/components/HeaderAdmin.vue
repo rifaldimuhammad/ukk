@@ -6,7 +6,13 @@ let router = useRouter();
 
 const user = JSON.parse(localStorage.getItem('user_data'));
 const getlevel = (value) => {
-  return value === user.level;
+  const user = JSON.parse(localStorage.getItem('user_data'));
+
+  if (user === null) {
+    router.push({ name: 'login' });
+  } else {
+    return value === user.level;
+  }
 };
 
 onMounted(() => {

@@ -4,15 +4,17 @@ import { apiClient, urlApi } from '../../api/axios-config';
 import swal from 'sweetalert';
 import ProfileTop from '../../components/ProfileTop.vue';
 
-let showAll = ref(true);
-let showBelumBayar = ref(false);
-let ShowSelesai = ref(false);
+let toggleLoadTransaksi = ref(false);
 const rowInvoice = reactive({
   items: [],
 });
 const getInvoice = async () => {
+  toggleLoadTransaksi.value = true;
   const { data } = await apiClient.get('/invoice');
   rowInvoice.items = data.data;
+  setTimeout(() => {
+    toggleLoadTransaksi.value = false;
+  }, 500);
 };
 const deleteInvoice = async (id) => {
   swal({
@@ -57,7 +59,14 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in rowInvoice.items" :key="index">
+          <tr v-if="toggleLoadTransaksi" class="position-relative">
+            <td style="position: absolute; top: 50%; left: 50%; transform: translate(-50%)">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading... </span>
+              </div>
+            </td>
+          </tr>
+          <tr v-else v-for="(item, index) in rowInvoice.items" :key="index">
             <td>{{ item.id }}</td>
             <td>
               <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id_pesanan }}</strong>
