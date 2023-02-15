@@ -11,21 +11,6 @@ import { reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { $ } from 'dom7';
 let router = useRouter();
-const user = localStorage.getItem('data_user');
-if (user != null) {
-  document.addEventListener('click', (e) => {
-    if (document.querySelector('.btn-nav-mobile').contains(e.target)) {
-      $('.layout-menu').toggleClass('trans-0');
-    }
-    if (!document.querySelector('.btn-nav-mobile').contains(e.target) && !document.querySelector('.layout-menu').contains(e.target)) {
-      $('.layout-menu').removeClass('trans-0');
-    }
-    //  else {
-    //   $('.layout-menu').toggleClass('trans-0');
-    // }
-  });
-}
-onMounted(async () => {});
 </script>
 <template>
   <div class="dashboard">

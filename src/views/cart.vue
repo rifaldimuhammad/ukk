@@ -55,6 +55,8 @@ const deleteCart = async (id) => {
       swal(`pesanan berhasil di hapus`, {
         icon: 'success',
       });
+      rowInvoice.fullJumlah = 0;
+      rowInvoice.fullTotal = 0;
       getCart();
     }
   });
@@ -73,6 +75,7 @@ const addToInvoice = async () => {
     text: 'Pesanan Terkonfirmasi',
     icon: 'success',
     buttons: ['Simpan Pesanan', 'Hapus Pesanan'],
+    dangerMode: true,
   }).then(async (willDelete) => {
     if (willDelete) {
       rowCart.items.map(async (e) => {
@@ -126,7 +129,7 @@ onMounted(() => {
       <div class="cart-info-btn" @click="toggleInvoice = true">order</div>
     </div>
   </div>
-  
+
   <div class="invoice" v-if="toggleInvoice">
     <div class="invoice-wrapper">
       <div class="invoice-header">

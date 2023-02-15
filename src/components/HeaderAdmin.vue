@@ -11,6 +11,15 @@ const getlevel = (value) => {
   if (user === null) {
     router.push({ name: 'login' });
   } else {
+    document.addEventListener('click', (e) => {
+      if (document.querySelector('.btn-nav-mobile').contains(e.target)) {
+        $('.layout-menu').toggleClass('trans-0');
+      }
+      if (!document.querySelector('.btn-nav-mobile').contains(e.target) && !document.querySelector('.layout-menu').contains(e.target)) {
+        $('.layout-menu').removeClass('trans-0');
+      }
+    });
+
     return value === user.level;
   }
 };

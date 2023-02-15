@@ -6,15 +6,16 @@ import Icons from '../../components/Icons.vue';
 import ValueJumlah from '../../components/ValueJumlah.vue';
 import { useRoute, useRouter } from 'vue-router';
 import swal from 'sweetalert';
-import { value } from 'dom7';
 let router = useRouter();
 let route = useRoute();
 let toggleLoadMenu = ref(false);
+let toggleToMeja = ref(false);
 let toggleToCart = ref(false);
 let toggleToMenu = ref(true);
 let toggleModelJumlah = ref(false);
 let toggleModalInvoice = ref(false);
 let toggleModalImgMenu = ref(false);
+let toggleModalSelectMeja = ref(false);
 let rowMenu = reactive({
   items: [],
 });
@@ -24,6 +25,9 @@ const rowKategori = reactive({
 const rowCart = reactive({
   items: [],
 });
+const rowMeja = reactive({
+  items: [],
+});
 let rowInvoice = reactive({
   id: '',
   id_menu: [],
@@ -31,6 +35,8 @@ let rowInvoice = reactive({
   pesanan: [],
   fullJumlah: 0,
   fullTotal: 0,
+  no_meja: 0,
+  waktu: 0,
 });
 let formAddCart = reactive({
   id_user: 1,
@@ -39,6 +45,7 @@ let formAddCart = reactive({
   jumlah_menu: 1,
   total_harga: '',
 });
+
 let arrTotal = reactive({
   total: 0,
 });
@@ -52,6 +59,36 @@ const getMenu = async () => {
     toggleLoadMenu.value = false;
   }, 500);
 };
+
+let formAddMeja;
+const getMeja = async () => {
+  let { data } = await apiClient.get('/meja');
+  rowMeja.items = data.data;
+  formAddMeja = reactive({
+    option: 'meja',
+    status: 'null',
+    no_meja: rowMeja.items.length,
+  });
+};
+
+const addMeja = async () => {
+  swal({
+    title: 'Yakin ?',
+    text: `Tambahkan Satu Meja Lagi?`,
+    icon: 'warning',
+    buttons: ['Kembali', 'Tambahkan'],
+    // dangerMode: true,
+  }).then(async (willDelete) => {
+    if (willDelete) {
+      let { data } = await apiClient.post('/meja', formAddMeja);
+      swal(`1 Meja ditambahkan`, {
+        icon: 'success',
+      });
+      getMeja();
+    }
+  });
+};
+
 const getMenuByCat = async (cat) => {
   await router.push({ name: 'kasirCategory', params: { category: cat } });
   toggleLoadMenu.value = true;
@@ -76,11 +113,15 @@ const getCart = async () => {
   const { data } = await apiClient.get(`/pesanan`);
   rowCart.items = data.data;
   rowInvoice.pesanan = data.data;
-  rowInvoice.pesanan.map(async (item, index) => {
+  rowInvoice.pesanan.map((item, index) => {
     rowInvoice.fullJumlah += parseInt(item.jumlah_menu);
     rowInvoice.fullTotal += parseInt(item.total_harga);
-    rowInvoice.id_pesanan.push(item.id);
-    rowInvoice.id_menu.push(item.id_menu);
+    if (!rowInvoice.id_pesanan.includes(item.id)) {
+      rowInvoice.id_pesanan.push(item.id);
+    }
+    if (!rowInvoice.id_menu.includes(item.id_menu)) {
+      rowInvoice.id_menu.push(item.id_menu);
+    }
   });
   rowCart.items.map(async (e) => {
     arrTotal.total += parseInt(e.total_harga);
@@ -90,11 +131,11 @@ const getCart = async () => {
 const addToCart = async () => {
   if (formAddCart.jumlah_menu > 0) {
     const { data } = await apiClient.post('/pesanan', formAddCart);
-    console.log(formAddCart);
     swal({
       icon: 'success',
       title: `${formAddCart.jumlah_menu} menu  berhasil di tambahkan `,
     });
+    getCart();
     toggleModelJumlah.value = false;
     toggleToCart.value = true;
     toggleToMenu.value = false;
@@ -118,15 +159,32 @@ const deleteCart = async (id) => {
       swal(`pesanan berhasil di hapus`, {
         icon: 'success',
       });
+      rowInvoice.fullJumlah = 0;
+      rowInvoice.fullTotal = 0;
       getCart();
     }
   });
 };
 
-
+const addInvoice = async () => {
+  const field = new FormData();
+  field.append('id_menu', rowInvoice.id_menu);
+  field.append('id_pesanan', rowInvoice.id_pesanan);
+  field.append('jumlah_pesanan', rowInvoice.fullJumlah);
+  field.append('total_harga', rowInvoice.fullTotal);
+  field.append('no_meja', rowInvoice.no_meja);
+  field.append('waktu', rowInvoice.waktu);
+  let { data } = await apiClient.post('/invoice', field);
+  toggleModalSelectMeja.value = false;
+  swal({
+    icon: 'success',
+    title: 'Pesanan Berhasil Di Konfirmasi',
+  });
+};
 onMounted(() => {
   getMenu();
   getCart();
+  getMeja();
   getKategori();
   if (route.params.category != null) {
     getMenuByCat(route.params.category);
@@ -135,24 +193,32 @@ onMounted(() => {
 </script>
 <template>
   <ProfileTop />
-
   <div class="py-4">
     <div class="d-flex gap-3 mb-3">
-      <button @click="(toggleToMenu = true), (toggleToCart = false)" class="btn d-flex gap-1" :class="toggleToMenu ? 'shadow-sm' : 'nav-link'">
-        <i class="bx bx-search fs-4 lh-0"></i>
+      <button @click="(toggleToMenu = true), (toggleToMeja = false), (toggleToCart = false), getMenu()" class="btn d-flex gap-1" :class="toggleToMenu ? 'shadow-sm' : 'nav-link'">
+        <Icons name="grid" height="20px" fill="#697a8d" />
         <p class="m-0">Menu</p>
       </button>
-      <button @click="(toggleToCart = true), (toggleToMenu = false)" class="btn d-flex gap-1" :class="toggleToCart ? 'shadow-sm' : 'nav-link'">
+      <button @click="(toggleToCart = true), (toggleToMeja = false), (toggleToMenu = false), getCart()" class="btn d-flex gap-1" :class="toggleToCart ? 'shadow-sm' : 'nav-link'">
         <div class="kasir-cart">
           <Icons name="cart" height="20px" fill="#697a8d" />
         </div>
         <p class="m-0">Cart</p>
       </button>
+      <button @click="(toggleToMeja = true), (toggleToCart = false), (toggleToMenu = false), getMeja()" class="btn d-flex gap-1" :class="toggleToMeja ? 'shadow-sm' : 'nav-link'">
+        <div class="kasir-cart">
+          <Icons name="garpu" height="20px" fill="#697a8d" />
+        </div>
+        <p class="m-0">Meja</p>
+      </button>
     </div>
 
-    <div v-if="toggleToMenu && toggleToCart == false" class="card">
+    <!-- ///////////MENU SECTION/////////////////////////
+    ////////////////////////////////////////////////// -->
+
+    <div v-if="toggleToMenu && toggleToCart == false && toggleToMeja == false" class="card">
       <div class="card-header bg-dark d-flex justify-content-between align-items-center gap-4">
-        <h5 class="m-0 text-nowrap text-light">Pesan Menu</h5>
+        <h5 class="m-0 text-nowrap text-white">Pesan Menu</h5>
         <div class="bg-dark d-flex gap-1">
           <i class="bx bx-search fs-4 lh-0"></i>
           <input type="text" placeholder="Search..." class="border-0 w-100 bg-dark text-white" />
@@ -206,56 +272,8 @@ onMounted(() => {
       style="z-index: 2000; transition: all 0.3s cubic-bezier(0.83, 0, 0.17, 1); background: rgba(0, 0, 0, 0.3)"
       @click="toggleModalImgMenu = false"
     >
-      
       <div class="modal-body d-flex justify-content-center align-items-center" style="overflow: auto">
         <img class="img-fluid w-50 content-popup-img-menu" :src="urlApi + rowPopupImg.cover" :alt="urlApi + rowPopupImg.cover" />
-      </div>
-    </div>
-
-    <div v-if="toggleToCart && toggleToMenu == false" class="kasir-cart">
-      <div class="card">
-        <h5 class="card-header">Table Basic</h5>
-        <div class="table-responsive text-nowrap">
-          <table class="table">
-            <thead class="table-dark">
-              <tr>
-                <th>No</th>
-                <th>Nama Menu</th>
-                <th>Harga</th>
-                <th>Jumlah</th>
-                <th>Total</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-              <tr v-for="(item, index) in rowCart.items" :key="index">
-                <td>
-                  <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ index + 1 }}</strong>
-                </td>
-                <td>{{ item.nama_menu }}</td>
-                <td>Rp {{ item.harga_menu }}.000</td>
-                <td>
-                  <ValueJumlah :value="item.jumlah_menu" />
-                </td>
-                <td>Rp {{ item.total_harga }}.000</td>
-                <td><div @click="deleteCart(item.id)" class="btn btn-danger">hps</div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card-header border-top d-flex justify-content-end gap-4">
-          <div class="d-flex align-items-center gap-2">
-            <h6 class="m-0 text-warning">Total Jumlah :</h6>
-            <h6 class="m-0">{{ rowInvoice.fullJumlah }} Menu</h6>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <h6 class="m-0 text-warning">Total Harga :</h6>
-            <h6 class="m-0">Rp {{ rowInvoice.fullTotal }}.000</h6>
-          </div>
-        </div>
-      </div>
-      <div class="d-flex my-4 gap 2">
-        <button class="btn btn-primary" @click="toggleModalInvoice = true">Konfirmasi Pesanan</button>
       </div>
     </div>
 
@@ -281,7 +299,92 @@ onMounted(() => {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" @click="toggleModelJumlah = false">Kembali</button>
-            <button @click="addToCart()" type="button" class="btn btn-primary">Pesan</button>
+            <button @click="addToCart()" type="button" class="btn btn-primary">Tambahkan Ke Keranjang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ///////////CART SECTION/////////////////////////
+    ////////////////////////////////////////////////// -->
+
+    <div v-if="toggleToCart && toggleToMenu == false && toggleToMeja == false" class="kasir-cart">
+      <div class="card">
+        <h5 class="card-header bg-dark text-white">Keranjang Pesanan</h5>
+        <div class="table-responsive text-nowrap">
+          <table class="table">
+            <thead class="table-dark">
+              <tr>
+                <th>No</th>
+                <th>Nama Menu</th>
+                <th>Harga</th>
+                <th>Jumlah</th>
+                <th>Total</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              <tr v-for="(item, index) in rowCart.items" :key="index">
+                <td>
+                  <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ index + 1 }}</strong>
+                </td>
+                <td>{{ item.nama_menu }}</td>
+                <td>Rp {{ item.harga_menu }}.000</td>
+                <td><ValueJumlah :defaultValue="item.jumlah_menu" :form="item" /></td>
+                <td>Rp {{ item.total_harga }}.000</td>
+                <td>
+                  <div @click="deleteCart(item.id)" class="btn btn-danger"><Icons name="trash" fill="white" height="20px" /></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-header border-top d-flex justify-content-end gap-4">
+          <div class="d-flex align-items-center gap-2">
+            <h6 class="m-0 text-warning">Total Jumlah :</h6>
+            <h6 class="m-0">{{ rowInvoice.fullJumlah }} Menu</h6>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <h6 class="m-0 text-warning">Total Harga :</h6>
+            <h6 class="m-0">Rp {{ rowInvoice.fullTotal }}.000</h6>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex my-4 gap 2">
+        <button class="btn btn-primary" @click="toggleModalSelectMeja = true">Konfirmasi Pesanan</button>
+      </div>
+    </div>
+
+    <div v-if="toggleModalSelectMeja" class="modal fade show" id="modalCenter" style="display: block; background-color: var(--bs-gray-dark)">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCenterTitle">Meja & Waktu</h5>
+            <button type="button" class="btn-close" @click="toggleModalSelectMeja = false"></button>
+          </div>
+          <div class="modal-body">
+            <div class="d-flex flex-column gap-2">
+              <h6 class="m-0">Pilih Meja</h6>
+              <select class="form-control cursor-pointer" v-model="rowInvoice.no_meja">
+                <option v-for="(item, index) in rowMeja.items" :key="index" :value="item.no_meja" :class="item.status == 'notnull' ? 'd-none' : 'd-block'">{{ item.option }} {{ item.no_meja == '0' ? ' ' : item.no_meja }}</option>
+              </select>
+            </div>
+            <div class="d-flex flex-column gap-2 mt-3">
+              <h6 class="m-0">Pilih Waktu <span class="text-warning">(menit)</span></h6>
+              <div class="d-flex gap-3">
+                <input type="number" class="form-control w-50" min="0" v-model="rowInvoice.waktu" />
+                <div class="d-flex align-items-center justify-content-start gap-3 w-50">
+                  <h6 class="m-0 text-warning">Total Waktu :</h6>
+                  <h6 class="m-0">
+                    {{ rowInvoice.waktu >= 60 ? `${Math.floor(rowInvoice.waktu / 60)} Jam, ${Math.floor(parseInt(rowInvoice.waktu) - Math.floor(60 * Math.floor(rowInvoice.waktu / 60)))} Menit` : `${rowInvoice.waktu} Menit` }}
+                  </h6>
+                </div>
+              </div>
+            </div>
+            <div class="mt-5 d-flex gap-3">
+              <button type="button" class="btn btn-outline-secondary w-100 bg-secondary text-white" @click="toggleModalSelectMeja = false">Kembali</button>
+              <button @click="addInvoice()" type="button" class="btn btn-primary w-100">Pesan Sekarang</button>
+            </div>
           </div>
         </div>
       </div>
@@ -296,6 +399,21 @@ onMounted(() => {
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" @click="toggleModalInvoice = false">Close</button>
         <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ///////////MEJA SECTION/////////////////////////
+    ////////////////////////////////////////////////// -->
+
+    <div v-if="toggleToCart == false && toggleToMenu == false && toggleToMeja" class="card">
+      <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+        <h5 class="text-white m-0">Meja</h5>
+        <button class="btn btn-primary" @click="addMeja">Tambah 1 Meja</button>
+      </div>
+      <div class="card-body d-flex gap-4 pt-4 flex-wrap justify-content-start">
+        <div class="meja" v-for="(item, index) in rowMeja.items" :key="index">
+          <h1 class="meja-col m-0 shadow-sm btn btn-xl fw-bold" :class="item.status == 'notnull' ? 'bg-success text-white' : 'bg-white'" v-if="item.no_meja > 0">{{ item.no_meja }}</h1>
+        </div>
       </div>
     </div>
   </div>

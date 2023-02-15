@@ -72,7 +72,6 @@ const getMenuByCat = async (cat) => {
     toggleLoadMenu.value = false;
   }, 1000);
 };
-
 const addToCart = async () => {
   formAddCart.id_menu = popupDetailData.id;
   formAddCart.id_user = 1;

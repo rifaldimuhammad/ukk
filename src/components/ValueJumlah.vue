@@ -1,19 +1,43 @@
 <script setup>
-import { ref } from 'vue';
-defineProps({
-  value: String,
-  index: Number,
+import { ref, onMounted, reactive } from 'vue';
+import swal from 'sweetalert';
+import { apiClient } from '../api/axios-config';
+let toggleValueJumlah = ref(false);
+let props = defineProps({
+  defaultValue: String,
+  form: JSON,
 });
 
-let toggleValueJumlah = ref(false);
+let formUpdateValue = reactive({
+  id_user: 1,
+  id_menu: props.form.id_menu,
+  harga_menu: props.form.harga_menu,
+  jumlah_menu: 1,
+  total_harga: props.form.total_harga,
+});
+
+let updateForm = async () => {
+  if (formUpdateValue.jumlah_menu <= 0) {
+    swal({
+      icon: 'warning',
+      title: `Menu Tidak Boleh Kosong`,
+    });
+  } else {
+    let { data } = await apiClient.post('/pesanan', formUpdateValue);
+    swal({
+      icon: 'success',
+      title: `Data Berhasil Di Update`,
+    });
+  }
+};
 </script>
 <template>
   <div v-if="toggleValueJumlah" class="position-relative">
-    <input class="btn bg-dark text-white value-jumlah-comp" type="number" :value="value" style="width: 100px" />
-    <button class="btn bg-white shadow-lg text-dark position-absolute bottom-0 fw-bold start-0 value-jumlah-comp-can">cancel</button>
-    <button class="btn bg-white shadow-lg text-dark position-absolute bottom-0 fw-bold end-0 value-jumlah-comp-sv">save</button>
+    <input class="btn bg-dark text-white value-jumlah-comp" type="number" min="0" v-model="formUpdateValue.jumlah_menu" style="width: 100px" />
+    <button @click="toggleValueJumlah = false" class="btn bg-white shadow-lg text-dark position-absolute bottom-0 fw-bold start-0 value-jumlah-comp-can">cancel</button>
+    <button @click="updateForm" class="btn bg-white shadow-lg text-dark position-absolute bottom-0 fw-bold end-0 value-jumlah-comp-sv">save</button>
   </div>
-  <p v-else @click="toggleValueJumlah = true" class="value-jumlah-comp">{{ value }}</p>
+  <p v-else @click="toggleValueJumlah = true" class="value-jumlah-comp">{{ defaultValue }}</p>
 </template>
 <style lang="scss">
 .value-jumlah-comp {

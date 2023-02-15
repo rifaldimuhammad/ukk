@@ -2,7 +2,6 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { urlApi } from '../api/axios-config';
-
 let router = useRouter();
 let route = useRoute();
 
@@ -43,14 +42,15 @@ onMounted(() => {
     </div>
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
       <!-- Search -->
-      
+
       <!-- /Search -->
 
       <ul class="navbar-nav flex-row align-items-center ms-auto">
         <!-- Place this tag where you want the button to render. -->
-        <li class="nav-item lh-1 me-3 ">
+        <li class="nav-item lh-1 me-3">
           <span></span>
         </li>
+
 
         <!-- User -->
         <li class="nav-item navbar-dropdown dropdown-user dropdown">

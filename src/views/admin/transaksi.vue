@@ -16,7 +16,7 @@ const getInvoice = async () => {
     toggleLoadTransaksi.value = false;
   }, 500);
 };
-const deleteInvoice = async (id) => {
+const deleteInvoice = async (id, noMeja) => {
   swal({
     title: 'Yakin ?',
     text: `Apakah kamu yakin untuk menghapus transaksi  ini!`,
@@ -26,6 +26,7 @@ const deleteInvoice = async (id) => {
   }).then(async (willDelete) => {
     if (willDelete) {
       const { data } = await apiClient.delete(`/invoice/${id}`);
+      await apiClient.post(`/meja/${noMeja}?_method=PUT`, noMeja);
       swal(`Transaksi berhasil di hapus`, {
         icon: 'success',
       });
@@ -52,6 +53,7 @@ onMounted(() => {
             <th>id</th>
             <th>id pesanan</th>
             <th>id menu</th>
+            <th>No Meja</th>
             <th>jumlah_pesanan</th>
             <th>total harga</th>
             <th>Tanggal / waktu</th>
@@ -72,6 +74,7 @@ onMounted(() => {
               <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id_pesanan }}</strong>
             </td>
             <td>{{ item.id_menu }}</td>
+            <td>{{ item.no_meja }}</td>
             <td>{{ item.jumlah_pesanan }}</td>
             <td>Rp {{ item.total_harga }}k</td>
             <td>
@@ -85,7 +88,7 @@ onMounted(() => {
                 </button>
                 <div class="dropdown-menu">
                   <button class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
-                  <button class="dropdown-item" @click="deleteInvoice(item.id)"><i class="bx bx-trash me-1"></i> Delete</button>
+                  <button class="dropdown-item" @click="deleteInvoice(item.id, item.no_meja)"><i class="bx bx-trash me-1"></i> Delete</button>
                 </div>
               </div>
             </td>

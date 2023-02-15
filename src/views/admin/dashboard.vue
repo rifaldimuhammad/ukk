@@ -3,6 +3,7 @@ import { reactive, onMounted, ref } from 'vue';
 import Icons from '../../components/Icons.vue';
 import ProfileTop from '../../components/ProfileTop.vue';
 import { apiClient } from '../../api/axios-config';
+import Timer from '../../components/Timer.vue';
 let toggleLoadTransaksi = ref(false);
 let rowTransaksiDateNow = reactive({
   items: [],
@@ -33,8 +34,8 @@ const getTransaksiDateNow = async () => {
   toggleLoadTransaksi.value = true;
   let { data } = await apiClient.get(`/invoice/byDate/${dateNow}`);
   rowTransaksiDateNow.items = data.data;
+  dataTransaksi.hariIni = 0;
   rowTransaksiDateNow.items.map((item) => {
-    dataTransaksi.hariIni = 0;
     dataTransaksi.hariIni += parseInt(item.total_harga);
   });
   setTimeout(() => {
@@ -45,8 +46,8 @@ const getTransaksiMonthNow = async () => {
   toggleLoadTransaksi.value = true;
   let { data } = await apiClient.get(`/invoice/byDate/${monthNow}`);
   rowTransaksiMonthNow.items = data.data;
+  dataTransaksi.bulanIni = 0;
   rowTransaksiMonthNow.items.map((item) => {
-    dataTransaksi.bulanIni = 0;
     dataTransaksi.bulanIni += parseInt(item.total_harga);
   });
   setTimeout(() => {
@@ -74,11 +75,31 @@ onMounted(() => {
 </script>
 <template>
   <ProfileTop />
-  <div class="row mt-3">
-    <div class="col-xl-3 col-sm-6 grid-margin mb-3 stretch-card">
+  <div class="w-100 mt-4">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="text-muted font-weight-normal">Seluruh Pendapatan</h6>
+        <div class="row">
+          <div class="col-9">
+            <div class="d-flex align-items-center align-self-start">
+              <h3 class="mb-0">Rp {{ dataTransaksi.bulanIni }}.000</h3>
+              <p class="text-success ml-2 mb-0 font-weight-medium">+11%</p>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="icon icon-box-success">
+              <span class="mdi mdi-arrow-top-right icon-item"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-4 my-3">
+    <div class="w-100">
       <div class="card">
         <div class="card-body">
-          <h6 class="text-muted font-weight-normal">Pendapatan Hari ini</h6>
+          <h6 class="text-muted font-weight-normal">Pendapatan Hari ini | {{ `${date.getFullYear()}-${date.getUTCMonth() + 1}-${date.getDate()}` }}</h6>
           <div class="row">
             <div class="col-9">
               <div class="d-flex align-items-center align-self-start">
@@ -95,7 +116,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="col-xl-3 col-sm-6 grid-margin mb-3 stretch-card">
+    <div class="w-100">
       <div class="card">
         <div class="card-body">
           <h6 class="text-muted font-weight-normal">Pendapatan Bulan Ini</h6>
@@ -129,13 +150,13 @@ onMounted(() => {
       <table class="table table-dark">
         <thead>
           <tr>
-            <th>id</th>
-            <th>id pesanan</th>
+            <th>No</th>
             <th>id menu</th>
+            <th>No Meja</th>
+            <th>Status</th>
             <th>jumlah_pesanan</th>
             <th>total harga</th>
             <th>Tanggal / waktu</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -147,27 +168,15 @@ onMounted(() => {
             </td>
           </tr>
           <tr v-else v-for="(item, index) in selectTransaksi.items" :key="index">
-            <td>{{ item.id }}</td>
-            <td>
-              <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id_pesanan }}</strong>
-            </td>
+            <td>{{ index + 1 }}</td>
             <td>{{ item.id_menu }}</td>
+            <td>{{ item.no_meja }}</td>
+            <td><Timer :date="item.created_at" :time="item.created_at_time" :no-meja="item.no_meja" :waktu="item.waktu" /></td>
             <td>{{ item.jumlah_pesanan }}</td>
             <td>Rp {{ item.total_harga }}k</td>
             <td>
               {{ item.created_at }} /
               <p class="text-warning">{{ item.created_at_time }}</p>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button @click="toggleActionTable = true" type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                  <i class="bx bx-dots-vertical-rounded"></i>
-                </button>
-                <div class="dropdown-menu">
-                  <button class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
-                  <button class="dropdown-item" @click="deleteInvoice(item.id)"><i class="bx bx-trash me-1"></i> Delete</button>
-                </div>
-              </div>
             </td>
           </tr>
         </tbody>
