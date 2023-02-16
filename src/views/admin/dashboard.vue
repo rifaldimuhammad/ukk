@@ -18,6 +18,7 @@ let dataTransaksi = reactive({
   hariIni: 0,
   bulanIni: 0,
 });
+
 let date = new Date();
 let dateNow = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 let monthNow = `${date.getFullYear()}-${date.getMonth()}-0`;
@@ -54,7 +55,7 @@ const getTransaksiMonthNow = async () => {
     toggleLoadTransaksi.value = false;
   }, 500);
 };
-let selectTransaksi = rowTransaksi;
+let selectTransaksi = rowTransaksiDateNow;
 let onSelectTransaksi = (e) => {
   if (e.target.value == 'semuaTransaksi') {
     selectTransaksi = rowTransaksi;
@@ -141,8 +142,8 @@ onMounted(() => {
     <h5 class="card-header d-flex align-items-center gap-4">
       Transaksi
       <select v-on:change="onSelectTransaksi" name="selectTransaksi" id="selectTransaksi" class="form-control cursor-pointer" style="width: fit-content">
-        <option selected value="semuaTransaksi">Semua Transaksi</option>
-        <option value="transaksiHariIni">Transaksi Hari Ini</option>
+        <option value="semuaTransaksi">Semua Transaksi</option>
+        <option selected value="transaksiHariIni">Transaksi Hari Ini</option>
         <option value="transaksiBulanIni">Transaksi Bulan ini</option>
       </select>
     </h5>
@@ -157,6 +158,7 @@ onMounted(() => {
             <th>jumlah_pesanan</th>
             <th>total harga</th>
             <th>Tanggal / waktu</th>
+            <th>Tanggal Update</th>
           </tr>
         </thead>
         <tbody>
@@ -170,13 +172,22 @@ onMounted(() => {
           <tr v-else v-for="(item, index) in selectTransaksi.items" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ item.id_menu }}</td>
-            <td>{{ item.no_meja }}</td>
-            <td><Timer :date="item.created_at" :time="item.created_at_time" :no-meja="item.no_meja" :waktu="item.waktu" /></td>
+            <td>
+              <h6 v-if="item.no_meja == '0'" class="text-warning m-0">Di Bawa Pulang</h6>
+              <p v-else class="m-0">{{ item.no_meja }}</p>
+            </td>
+            <td>
+              <Timer :update-date="item.updated_at" :update-time="item.updated_at_time" :time="item.created_at" :date="item.created_at_time" :no-meja="item.no_meja" :waktu="item.waktu" :id-invoice="item.id" :e-waktu="item.ekstra_waktu" />
+            </td>
             <td>{{ item.jumlah_pesanan }}</td>
-            <td>Rp {{ item.total_harga }}k</td>
+            <td>Rp {{ item.total_harga }}.000</td>
             <td>
               {{ item.created_at }} /
               <p class="text-warning">{{ item.created_at_time }}</p>
+            </td>
+            <td>
+              {{ item.updated_at }} /
+              <p class="text-warning">{{ item.updated_at_time }}</p>
             </td>
           </tr>
         </tbody>

@@ -36,7 +36,7 @@ let rowInvoice = reactive({
   fullJumlah: 0,
   fullTotal: 0,
   no_meja: 0,
-  waktu: 0,
+  waktu: 1,
 });
 let formAddCart = reactive({
   id_user: 1,
@@ -113,6 +113,8 @@ const getCart = async () => {
   const { data } = await apiClient.get(`/pesanan`);
   rowCart.items = data.data;
   rowInvoice.pesanan = data.data;
+  rowInvoice.fullJumlah = 0;
+  rowInvoice.fullTotal = 0;
   rowInvoice.pesanan.map((item, index) => {
     rowInvoice.fullJumlah += parseInt(item.jumlah_menu);
     rowInvoice.fullTotal += parseInt(item.total_harga);
@@ -174,12 +176,15 @@ const addInvoice = async () => {
   field.append('total_harga', rowInvoice.fullTotal);
   field.append('no_meja', rowInvoice.no_meja);
   field.append('waktu', rowInvoice.waktu);
-  let { data } = await apiClient.post('/invoice', field);
-  toggleModalSelectMeja.value = false;
-  swal({
-    icon: 'success',
-    title: 'Pesanan Berhasil Di Konfirmasi',
-  });
+  if (rowInvoice.no_meja == 0) {
+  } else {
+    let { data } = await apiClient.post('/invoice', field);
+    toggleModalSelectMeja.value = false;
+    swal({
+      icon: 'success',
+      title: 'Pesanan Berhasil Di Konfirmasi',
+    });
+  }
 };
 onMounted(() => {
   getMenu();
@@ -369,10 +374,10 @@ onMounted(() => {
                 <option v-for="(item, index) in rowMeja.items" :key="index" :value="item.no_meja" :class="item.status == 'notnull' ? 'd-none' : 'd-block'">{{ item.option }} {{ item.no_meja == '0' ? ' ' : item.no_meja }}</option>
               </select>
             </div>
-            <div class="d-flex flex-column gap-2 mt-3">
+            <div v-if="rowInvoice.no_meja != 0" class="d-flex flex-column gap-2 mt-3">
               <h6 class="m-0">Pilih Waktu <span class="text-warning">(menit)</span></h6>
               <div class="d-flex gap-3">
-                <input type="number" class="form-control w-50" min="0" v-model="rowInvoice.waktu" />
+                <input type="number" class="form-control w-50" min="1" v-model="rowInvoice.waktu" />
                 <div class="d-flex align-items-center justify-content-start gap-3 w-50">
                   <h6 class="m-0 text-warning">Total Waktu :</h6>
                   <h6 class="m-0">

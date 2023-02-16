@@ -50,7 +50,7 @@ onMounted(() => {
       <table class="table">
         <thead>
           <tr>
-            <th>id</th>
+            <th>No</th>
             <th>id pesanan</th>
             <th>id menu</th>
             <th>No Meja</th>
@@ -69,7 +69,7 @@ onMounted(() => {
             </td>
           </tr>
           <tr v-else v-for="(item, index) in rowInvoice.items" :key="index">
-            <td>{{ item.id }}</td>
+            <td>{{ index + 1 }}</td>
             <td>
               <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ item.id_pesanan }}</strong>
             </td>
