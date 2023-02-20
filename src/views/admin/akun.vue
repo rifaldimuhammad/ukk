@@ -6,6 +6,7 @@ import { reactive, onMounted, ref } from 'vue';
 import { apiClient, urlApi } from '../../api/axios-config';
 import Icons from '../../components/Icons.vue';
 import { useRouter } from 'vue-router';
+import swal from 'sweetalert';
 let router = useRouter();
 let togglePassword = ref(false);
 let toggleOnCoverChange = ref(false);
@@ -36,6 +37,7 @@ let getImg = (e) => {
   }
 };
 
+const user = JSON.parse(localStorage.getItem('user_data'));
 const getUserData = async () => {
   if (user === null) {
     router.push({ name: 'login' });
@@ -47,10 +49,31 @@ const getUserData = async () => {
   }
 };
 
-const user = JSON.parse(localStorage.getItem('user_data'));
-
 const updateUser = async () => {
-  const { data } = await apiClient.post(`/user/${user.id}?_method=PUT`, formDataUser);
+  const field = new FormData();
+  field.append('name', formDataUser.name);
+  field.append('email', formDataUser.email);
+  field.append('level', formDataUser.level);
+  field.append('cover', formDataUser.cover);
+  // field.append('password', formDataUser.password);
+  console.log(formDataUser);
+  const { data } = await apiClient.post(`/user/${user.id}?_method=PUT`, field);
+  if (data.success) {
+    swal({
+      Icon: 'success',
+      title: 'Data Profile Berhasil Di Rubah',
+    });
+    localStorage.clear();
+    window.location.reload();
+    localStorage.setItem('user_data', JSON.stringify(data.data));
+    localStorage.setItem('token', data.token);
+    getUserData();
+  } else {
+    swal({
+      icon: 'warning',
+      title: 'Email Atau pasword salah',
+    });
+  }
 };
 onMounted(() => {
   getUserData();
@@ -109,9 +132,9 @@ onMounted(() => {
                 <div class="mb-3">
                   <label for="email" class="form-label">Update password</label>
                   <div class="form-control d-flex align-items-center">
-                    <input class="border-0 w-100" style="outline: none" v-model="formDataUser.password" :type="togglePassword ? 'text' : 'password'" id="password" name="password" placeholder="john.doe@example.com" />
+                    <input class="border-0 w-100" style="outline: none" v-model="formDataUser.password" :type="togglePassword ? 'text' : 'password'" id="password" name="password" placeholder="****" />
                     <div class="cursor-pointer" @click="togglePassword = !togglePassword">
-                      <Icons name="eye" height="25px" fill="#697a8d" />
+                      <Icons name="eye" height="16px" fill="#697a8d" />
                     </div>
                   </div>
                 </div>
