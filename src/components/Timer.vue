@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, defineEmits } from 'vue';
 import { apiClient } from '../api/axios-config';
 import swal from 'sweetalert';
-let toggleTooltipHover = ref(false);
+let toggleLoadTimer = ref(false);
 let toggleBtnAlert = ref(false);
 let toggleModalAddTime = ref(false);
+
 let props = defineProps({
   idInvoice: Number,
   date: String,
@@ -59,10 +60,13 @@ const updateTime = async (id) => {
     toggleBtnAlert.value = false;
   }
 };
+
+const emit = defineEmits(['refreshTable']);
 const goHome = async () => {
   await apiClient.post(`/invoice/updateEkstra/${props.idInvoice}`, formGoHome);
   apiClient.post(`/meja/${props.noMeja}?_method=PUT`, props.noMeja);
   toggleModalAddTime.value = false;
+  emit('refresh-table', true);
   swal({
     icon: 'success',
     title: 'Pelanggan sudah pulang',
@@ -75,7 +79,6 @@ const goHome = async () => {
     <span class="position-absolute start-50 tooltip-timer btn-sm bg-white text-dark">Tekan Untuk Tambah Waktu</span>
   </div>
   <span v-else class="badge bg-label-warning me-1"> {{ distance < 0 ? timer.value : `Timer :  ${timer.value}` }}</span>
-
   <div v-if="toggleModalAddTime" class="modal fade show" id="modalCenter" style="display: block; background-color: var(--bs-gray-dark)">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">

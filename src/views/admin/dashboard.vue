@@ -55,6 +55,9 @@ const getTransaksiMonthNow = async () => {
     toggleLoadTransaksi.value = false;
   }, 500);
 };
+const refreshTable = (value) => {
+  getTransaksiDateNow();
+};
 let selectTransaksi = rowTransaksiDateNow;
 let onSelectTransaksi = (e) => {
   if (e.target.value == 'semuaTransaksi') {
@@ -77,7 +80,7 @@ onMounted(() => {
 <template>
   <ProfileTop />
   <div class="w-100 mt-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <h6 class="text-muted font-weight-normal">Seluruh Pendapatan</h6>
         <div class="row">
@@ -93,6 +96,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
+        <img src="/src/assets/admin/img/dashboard.svg" alt="/src/assets/admin/img/dashboard.svg" class="position-absolute left-end h-100" />
       </div>
     </div>
   </div>
@@ -177,7 +181,17 @@ onMounted(() => {
               <p v-else class="m-0">{{ item.no_meja }}</p>
             </td>
             <td>
-              <Timer :update-date="item.updated_at" :update-time="item.updated_at_time" :time="item.created_at" :date="item.created_at_time" :no-meja="item.no_meja" :waktu="item.waktu" :id-invoice="item.id" :e-waktu="item.ekstra_waktu" />
+              <Timer
+                @refresh-table="refreshTable"
+                :update-date="item.updated_at"
+                :update-time="item.updated_at_time"
+                :time="item.created_at"
+                :date="item.created_at_time"
+                :no-meja="item.no_meja"
+                :waktu="item.waktu"
+                :id-invoice="item.id"
+                :e-waktu="item.ekstra_waktu"
+              />
             </td>
             <td>{{ item.jumlah_pesanan }}</td>
             <td>Rp {{ item.total_harga }}.000</td>

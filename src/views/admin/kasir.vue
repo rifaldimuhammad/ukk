@@ -371,7 +371,9 @@ onMounted(() => {
             <div class="d-flex flex-column gap-2">
               <h6 class="m-0">Pilih Meja</h6>
               <select class="form-control cursor-pointer" v-model="rowInvoice.no_meja">
-                <option v-for="(item, index) in rowMeja.items" :key="index" :value="item.no_meja" :class="item.status == 'notnull' ? 'd-none' : 'd-block'">{{ item.option }} {{ item.no_meja == '0' ? ' ' : item.no_meja }}</option>
+                <option v-for="(item, index) in rowMeja.items" :key="index" :value="item.no_meja" :class="item.status == 'notnull' ? 'd-none' : 'd-block'">
+                  {{ item.option == 'bawa_pulang' ? 'bawa Pulang' : 'Meja' }} {{ item.no_meja == '0' ? ' ' : item.no_meja }}
+                </option>
               </select>
             </div>
             <div v-if="rowInvoice.no_meja != 0" class="d-flex flex-column gap-2 mt-3">
