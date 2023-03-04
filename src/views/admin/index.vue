@@ -19,6 +19,7 @@ let router = useRouter();
       <RouterView />
     </div>
   </div>
+  
 </template>
 <style lang="scss">
 .dashboard {

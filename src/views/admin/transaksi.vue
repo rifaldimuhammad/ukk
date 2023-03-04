@@ -87,7 +87,6 @@ onMounted(() => {
                   <i class="bx bx-dots-vertical-rounded"></i>
                 </button>
                 <div class="dropdown-menu">
-                  <button class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
                   <button class="dropdown-item" @click="deleteInvoice(item.id, item.no_meja)"><i class="bx bx-trash me-1"></i> Delete</button>
                 </div>
               </div>

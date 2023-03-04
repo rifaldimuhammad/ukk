@@ -39,11 +39,7 @@ const router = createRouter({
         {
           path: '/kasir',
           name: 'kasir',
-          // meta: {
-          //   level: ['kasir'],
-          // },
           component: () => import('../views/admin/kasir.vue'),
-
           children: [
             {
               path: '/kasir/category=:category',

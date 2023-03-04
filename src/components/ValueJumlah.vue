@@ -1,8 +1,10 @@
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, defineEmits } from 'vue';
 import swal from 'sweetalert';
 import { apiClient } from '../api/axios-config';
 let toggleValueJumlah = ref(false);
+
+const emit = defineEmits(['update-value']);
 let props = defineProps({
   defaultValue: String,
   form: JSON,
@@ -28,6 +30,8 @@ let updateForm = async () => {
       icon: 'success',
       title: `Data Berhasil Di Update`,
     });
+    toggleValueJumlah.value = false;
+    emit('update-value');
   }
 };
 </script>

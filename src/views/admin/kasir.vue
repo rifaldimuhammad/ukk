@@ -229,22 +229,24 @@ onMounted(() => {
           <input type="text" placeholder="Search..." class="border-0 w-100 bg-dark text-white" />
         </div>
       </div>
-      <div class="d-flex gap-3 mx-4 flex-wrap my-4">
-        <RouterLink :to="{ name: 'kasir' }" @click="getMenu()" active-class="btn-dark" class="btn btn-outline-dark d-flex gap-1 align-items-center">
-          <Icons name="grid" height="20px" fill="#697a8d" />
-          <p class="m-0">All</p>
-        </RouterLink>
-        <RouterLink
-          v-for="(item, index) in rowKategori.items"
-          :key="index"
-          :to="{ name: 'kasirCategory', params: { category: item.nama } }"
-          @click="getMenuByCat(item.nama)"
-          active-class="btn-dark"
-          class="btn btn-outline-dark d-flex gap-1 align-items-center"
-        >
-          <img :src="urlApi + item.cover" :alt="item.cover" style="height: 16px; width: 16px" />
-          <p class="m-0">{{ item.nama }}</p>
-        </RouterLink>
+      <div class="overflow-auto mx-4 my-4 ">
+        <div class="d-flex gap-3">
+          <RouterLink :to="{ name: 'kasir' }" @click="getMenu()" active-class="btn-dark" class="btn btn-outline-dark d-flex gap-1 align-items-center">
+            <Icons name="grid" height="20px" fill="#697a8d" />
+            <p class="m-0">All</p>
+          </RouterLink>
+          <RouterLink
+            v-for="(item, index) in rowKategori.items"
+            :key="index"
+            :to="{ name: 'kasirCategory', params: { category: item.nama } }"
+            @click="getMenuByCat(item.nama)"
+            active-class="btn-dark"
+            class="btn btn-outline-dark d-flex gap-1 align-items-center"
+          >
+            <img :src="urlApi + item.cover" :alt="item.cover" style="height: 16px; width: 16px" />
+            <p class="m-0">{{ item.nama }}</p>
+          </RouterLink>
+        </div>
       </div>
       <div class="card-body p-4 d-flex gap-3 flex-wrap">
         <div
@@ -328,14 +330,17 @@ onMounted(() => {
                 <th>Delete</th>
               </tr>
             </thead>
-            <tbody class="table-border-bottom-0">
+            <tbody v-if="rowCart.items.length == 0" class="text-dark fw-bold position-relative">
+              <div class="alert alert-danger position-absolute top-0 start-50" style="transform: translate(-50%, 50%)">Keranjang Kosong!, Tambahkan Di Menu Pesanan</div>
+            </tbody>
+            <tbody v-else class="table-border-bottom-0">
               <tr v-for="(item, index) in rowCart.items" :key="index">
                 <td>
                   <i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{ index + 1 }}</strong>
                 </td>
                 <td>{{ item.nama_menu }}</td>
                 <td>Rp {{ item.harga_menu }}.000</td>
-                <td><ValueJumlah :defaultValue="item.jumlah_menu" :form="item" /></td>
+                <td><ValueJumlah @update-value="getCart" :defaultValue="item.jumlah_menu" :form="item" /></td>
                 <td>Rp {{ item.total_harga }}.000</td>
                 <td>
                   <div @click="deleteCart(item.id)" class="btn btn-danger"><Icons name="trash" fill="white" height="20px" /></div>
@@ -356,7 +361,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="d-flex my-4 gap 2">
-        <button class="btn btn-primary" @click="toggleModalSelectMeja = true">Konfirmasi Pesanan</button>
+        <button class="btn btn-primary" @click="rowCart.items.length == 0 ? swal({ icon: 'warning', title: 'Keranjang Kosong' }) : (toggleModalSelectMeja = true)">Konfirmasi Pesanan</button>
       </div>
     </div>
 

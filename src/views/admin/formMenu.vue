@@ -8,6 +8,8 @@ import swal from 'sweetalert';
 let toggleLoadMenu = ref(false);
 let togglePopupDetail = ref(false);
 let toggleSwitchImgUpdate = ref(false);
+let toggleToTable = ref(true);
+let toggleToForm = ref(false);
 const row = reactive({
   items: [],
 });
@@ -84,6 +86,8 @@ const addMenu = async () => {
     });
   } else {
     const { data } = await apiClient.post('/menu', fields);
+    toggleToForm.value = false;
+    toggleToTable.value = true;
     swal({
       title: 'Berhasil',
       text: 'Menu Berhasil Di Tambahkan',
@@ -106,10 +110,10 @@ const updateMenu = async () => {
       icon: 'warning',
     });
   } else {
-    console.log(dataMenuDetail);
     const { data } = await apiClient.post(`/menu/${dataMenuDetail.id}?_method=PUT`, fieldsEdit);
     togglePopupDetail.value = false;
     toggleSwitchImgUpdate.value = false;
+
     await swal({
       title: 'Berhasil',
       text: 'Menu Berhasil Di Ubah',
@@ -157,10 +161,14 @@ onMounted(() => {
 </script>
 <template>
   <ProfileTop />
-  <h4 class="fw-bold py-3 my-4">
+  <h4 class="fw-bold py-3">
     <span class="text-muted fw-light"> <RouterLink class="text-muted fw-normal" :to="{ name: 'dashboard' }">Dashboard </RouterLink>/</span> Menu
   </h4>
-  <form @submit.prevent="addMenu()" class="card mb-4">
+  <div class="d-flex gap-3 mb-3">
+    <button @click="(toggleToTable = true), (toggleToForm = false)" class="btn" :class="toggleToTable ? 'btn-primary' : 'shadow-sm'">Menu</button>
+    <button @click="(toggleToTable = false), (toggleToForm = true)" class="btn" :class="toggleToForm ? 'btn-primary' : 'shadow-sm'">Form Menu</button>
+  </div>
+  <form v-if="toggleToForm && toggleToTable == false" @submit.prevent="addMenu()" class="card mb-4">
     <h5 class="card-header">Form Controls</h5>
     <div class="card-body">
       <div class="mb-3">
@@ -192,6 +200,7 @@ onMounted(() => {
       <div class="mb-3">
         <label for="exampleFormControlSelect1" class="form-label">Kategori</label>
         <select class="form-select" name="kategori" required v-model="formDataMenu.kategori">
+          <option selected value="">-- Pilih Kategori --</option>
           <option v-for="item in rowKategori.items" :value="item.nama">{{ item.nama }}</option>
         </select>
       </div>
@@ -203,7 +212,7 @@ onMounted(() => {
     </div>
   </form>
 
-  <div class="dashboard-menu">
+  <div v-if="toggleToTable && toggleToForm == false" class="dashboard-menu">
     <div class="menu" v-for="item in row.items">
       <div v-if="toggleLoadMenu" class="pre-menu">
         <div class="pre-menu-top loader-content flex flex-wrap" style="height: 10rem; width: 10rem; margin-bottom: 1rem"></div>

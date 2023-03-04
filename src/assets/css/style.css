@@ -78,3 +78,8 @@ a {
   opacity: 0 !important;
   visibility: hidden !important;
 }
+.bg-asset {
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+}

@@ -9,6 +9,7 @@ let toggleModalAddTime = ref(false);
 let props = defineProps({
   idInvoice: Number,
   date: String,
+  fullTimesTamps: String,
   updateDate: String,
   updateTime: String,
   time: String,
@@ -26,6 +27,7 @@ let formGoHome = reactive({
   ekstra_waktu: 'false',
 });
 let distance;
+let fullTimesTamps = props.fullTimesTamps;
 let timesTamps = `${props.date} ${props.time}`;
 let updateTimesTamps = `${props.updateDate} ${props.updateTime}`;
 var countDownDate = new Date(props.eWaktu == 'true' ? updateTimesTamps : timesTamps).getTime() + Math.floor(props.waktu * 60000);

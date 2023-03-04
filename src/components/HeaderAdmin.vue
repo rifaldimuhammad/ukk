@@ -19,7 +19,6 @@ const getlevel = (value) => {
         $('.layout-menu').removeClass('trans-0');
       }
     });
-
     return value === user.level;
   }
 };
@@ -30,16 +29,12 @@ onMounted(() => {
 </script>
 <template>
   <aside id="layout-menu" class="menu-vertical menu bg-menu-theme layout-menu" data-bg-class="bg-menu-theme">
-    <div class="app-brand demo">
-      <a href="" class="app-brand-link">
+    <div class="my-3">
+      <a href="" class="app-brand-link d-flex flex-column">
         <span class="app-brand-logo demo">
-          <Icons name="garpu" />
+          <img style="height: 64px" alt="/src/assets/img/burger.png" src="/src/assets/img/burger.png" />
         </span>
-        <span class="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
-      </a>
-
-      <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-        <i class="bx bx-chevron-left bx-sm align-middle"></i>
+        <span class="app-brand-text demo menu-text fw-bolder ms-2">Restourant</span>
       </a>
     </div>
 
@@ -48,49 +43,39 @@ onMounted(() => {
     <ul class="menu-inner py-1 ps ps--active-y">
       <!-- Dashboard -->
       <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Kasir</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="kasir" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Kasir</div>
         </a>
       </RouterLink>
       <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir') || getlevel('admin')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Dashboard</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="gauge" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Dashboard</div>
         </a>
       </RouterLink>
       <RouterLink :to="{ name: 'dashboardUser' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('admin')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">User</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="user" fill="#697a8d" height="16px" class="pe-3" />
+          <div>User</div>
         </a>
       </RouterLink>
-
-      <li class="menu-header small text-uppercase">
-        <span class="menu-header-text">Halaman</span>
-      </li>
       <RouterLink :to="{ name: 'dashboardFormMenu' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Menu</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="garpu" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Menu</div>
         </a>
       </RouterLink>
-      <li class="menu-header small text-uppercase">
-        <span class="menu-header-text">Kategori</span>
-      </li>
       <RouterLink :to="{ name: 'dashboardKategori' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Kategori</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="burger" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Kategori</div>
         </a>
       </RouterLink>
-      <li class="menu-header small text-uppercase">
-        <span class="menu-header-text">Transaksi</span>
-      </li>
       <RouterLink :to="{ name: 'dashboardTransaksi' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
-        <a href="" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Transaksi</div>
+        <a href="" class="menu-link rounded">
+          <Icons name="transaksi" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Transaksi</div>
         </a>
       </RouterLink>
 

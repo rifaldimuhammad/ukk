@@ -11,13 +11,19 @@ let rowUser = reactive({
   items: [],
 });
 
+let user = JSON.parse(localStorage.getItem('user_data'));
+
 let formAddUser = reactive({
+  id_user: '',
   name: '',
   email: '',
   password: '',
   level: '',
   cover: '',
 });
+if (user !== null) {
+  formAddUser.id_user = user.id;
+}
 let onCoverAddUserChange = (e) => {
   formAddUser.cover = e.target.files[0];
   getImg(e, urlImg);
@@ -32,7 +38,7 @@ const getUser = async () => {
 };
 const addUser = async () => {
   const fields = new FormData();
-
+  fields.append('id_user', formAddUser.id_user);
   fields.append('name', formAddUser.name);
   fields.append('email', formAddUser.email);
   fields.append('password', formAddUser.password);
@@ -45,12 +51,19 @@ const addUser = async () => {
     });
   } else {
     let { data } = await apiClient.post('/user', fields);
-    swal({
-      icon: 'success',
-      title: `User ${formAddUser.name} berhasil di tambahkan`,
-    });
-    toggleModalAddUser.value = false;
-    getUser();
+    if (data.status) {
+      swal({
+        icon: 'success',
+        title: `User ${formAddUser.name} berhasil di tambahkan`,
+      });
+      toggleModalAddUser.value = false;
+      getUser();
+    } else {
+      swal({
+        icon: 'warning',
+        title: `Email Sudah Terdaftar`,
+      });
+    }
   }
 };
 const deleteUser = async (id) => {
@@ -132,7 +145,6 @@ onMounted(() => {
                   <i class="bx bx-dots-vertical-rounded"></i>
                 </button>
                 <div class="dropdown-menu">
-                  <button class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
                   <button class="dropdown-item" @click="deleteUser(item.id)"><i class="bx bx-trash me-1"></i> Delete</button>
                 </div>
               </div>
@@ -171,6 +183,7 @@ onMounted(() => {
             <div class="col mb-0">
               <label class="form-label">Level User</label
               ><select v-model="formAddUser.level" class="form-select" name="level" required="">
+                <option selected value="">-- Pilih Level --</option>
                 <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
                 <option value="kasir">Kasir</option>
