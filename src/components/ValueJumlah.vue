@@ -9,15 +9,10 @@ let props = defineProps({
   defaultValue: String,
   form: JSON,
 });
-
 let formUpdateValue = reactive({
-  id_user: 1,
-  id_menu: props.form.id_menu,
-  harga_menu: props.form.harga_menu,
   jumlah_menu: 1,
-  total_harga: props.form.total_harga,
+  harga_menu: props.form.harga_menu,
 });
-
 let updateForm = async () => {
   if (formUpdateValue.jumlah_menu <= 0) {
     swal({
@@ -25,13 +20,15 @@ let updateForm = async () => {
       title: `Menu Tidak Boleh Kosong`,
     });
   } else {
-    let { data } = await apiClient.post('/pesanan', formUpdateValue);
-    swal({
-      icon: 'success',
-      title: `Data Berhasil Di Update`,
-    });
-    toggleValueJumlah.value = false;
-    emit('update-value');
+    let { data } = await apiClient.post(`/keranjang/updateJumlah/${props.form.id}?_method=PUT`, formUpdateValue);
+    if (data.status) {
+      swal({
+        icon: 'success',
+        title: `Jumlah Menu Di Update`,
+      });
+      toggleValueJumlah.value = false;
+      emit('update-value');
+    }
   }
 };
 </script>

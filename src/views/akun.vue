@@ -1,10 +1,10 @@
 <script setup>
 import { advancePositionWithMutation } from '@vue/compiler-core';
-import ProfileTop from '../../components/ProfileTop.vue';
+import ProfileTop from '../components/ProfileTop.vue';
 
 import { reactive, onMounted, ref } from 'vue';
-import { apiClient, urlApi } from '../../api/axios-config';
-import Icons from '../../components/Icons.vue';
+import { apiClient, urlApi } from '../api/axios-config';
+import Icons from '../components/Icons.vue';
 import { useRouter } from 'vue-router';
 import swal from 'sweetalert';
 let router = useRouter();
@@ -75,6 +75,8 @@ const updateUser = async () => {
     });
   }
 };
+
+
 onMounted(() => {
   getUserData();
 });
@@ -147,23 +149,6 @@ onMounted(() => {
           </div>
           <!-- /Account -->
         </form>
-        <div class="card">
-          <h5 class="card-header">Delete Account</h5>
-          <div class="card-body">
-            <div class="mb-3 col-12 mb-0">
-              <div class="alert alert-warning">
-                <h6 class="alert-heading fw-bold mb-1">Are you sure you want to delete your account?</h6>
-              </div>
-            </div>
-            <form id="formAccountDeactivation" onsubmit="return false">
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="accountActivation" id="accountActivation" />
-                <label class="form-check-label" for="accountActivation">I confirm my account deactivation</label>
-              </div>
-              <button type="submit" class="btn btn-danger deactivate-account">Delete User</button>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   </div>

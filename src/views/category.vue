@@ -1,9 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import { apiClient, urlApi } from '../../api/axios-config';
-import ProfileTop from '../../components/ProfileTop.vue';
+import { apiClient, urlApi } from '../api/axios-config';
+import ProfileTop from '../components/ProfileTop.vue';
 import swal from 'sweetalert';
 let toggleActionTable = ref(false);
+let waitAddCat = ref(false);
 
 let toggleLoadCat = ref(false);
 const rowKategori = reactive({
@@ -19,19 +20,30 @@ let onCoverChangeKategori = (e) => {
   getImg(e);
 };
 const getKategori = async () => {
+  toggleLoadCat.value = true;
   const { data } = await apiClient.get('/kategori');
   rowKategori.items = data.data;
+  toggleLoadCat.value = false;
 };
 const addKategori = async () => {
+  waitAddCat.value = true;
   let field = new FormData();
   field.append('nama', formAddkategori.nama);
   field.append('cover', formAddkategori.cover);
   const { data } = await apiClient.post('/kategori', field);
-  swal({
-    icon: 'success',
-    title: `Kategori ${formAddkategori.nama} berhasil di tambahkan`,
-  });
-  getKategori();
+  if (data.status) {
+    swal({
+      icon: 'success',
+      title: `Kategori ${formAddkategori.nama} berhasil di tambahkan`,
+    });
+    waitAddCat.value = true;
+    getKategori();
+  } else {
+    swal({
+      icon: 'warning',
+      title: `${data.message}`,
+    });
+  }
 };
 const deleteKategori = async (id) => {
   swal({
@@ -89,7 +101,9 @@ onMounted(() => {
         </div>
       </div>
       <div class="mb-3"><label for="exampleFormControlInput1" class="form-label">Nama Kategori</label><input v-model="formAddkategori.nama" required="" type="text" name="nama" class="form-control" placeholder="Nama Kategori" /></div>
-      <button type="submit" class="btn btn-primary">Tambahkan Kategori</button>
+      <button :type="formAddkategori.cover == '' ? 'button' : 'submit'" @click="formAddkategori.cover == '' && swal({ icon: 'warning', title: 'Perhatikan', text: 'Foto Kategori Tidak Boleh Kosng' })" class="btn btn-primary">
+        Tambahkan Kategori
+      </button>
     </div>
   </form>
   <div class="card">
@@ -112,6 +126,13 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
+          <tr v-if="toggleLoadCat">
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+          </tr>
           <tr v-for="(item, index) in rowKategori.items" :key="index" v-if="toggleLoadCat == false">
             <td>{{ item.id }}</td>
             <td>

@@ -7,6 +7,7 @@ import Icons from './Icons.vue';
 let toggleNotifications = ref(false);
 let router = useRouter();
 let route = useRoute();
+let notifGreen = ref(false);
 
 let rowAktifitas = reactive({
   items: [],
@@ -20,7 +21,7 @@ let rowUser = reactive({
 });
 const user = JSON.parse(localStorage.getItem('user_data'));
 let doLogout = () => {
-  router.push({ name: 'login' });
+  router.push({ name: 'landing' });
   window.location.reload();
   localStorage.clear();
 };
@@ -44,6 +45,7 @@ let updateAktifitas = async (id) => {
   let { data } = await apiClient.post(`/aktifitas/${id}?_method=PUT`);
   getAktifitas();
 };
+
 onMounted(() => {
   getAktifitas();
   getUserData();
@@ -59,7 +61,7 @@ onMounted(() => {
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
       <ul class="navbar-nav flex-row align-items-center ms-auto">
         <li class="nav-item lh-1 me-3 d-flex align-items-center cursor-pointer position-relative">
-          <p class="m-0 notification-icon" @click="toggleNotifications = true">
+          <p class="m-0" :class="notifGreen && 'notification-icon'" @click="toggleNotifications = true">
             <Icons name="bell" height="25px" fill="#566a7f" />
           </p>
           <div v-if="toggleNotifications" class="card position-absolute top-0 end-100">
@@ -68,24 +70,26 @@ onMounted(() => {
               <p @click="toggleNotifications = false" class="m-0"><Icons name="close" height="16px" fill="#566a7f" /></p>
             </div>
             <!-- aktifitas card -->
-            <div v-for="(item, index) in rowAktifitas.items" :key="index" class="py-2 p-3 bg-label-info d-flex gap-3 align-items-start">
-              <div class="d-flex flex-column p-3 bg-white flex-grow-1">
-                <div class="d-flex gap-2 align-items-center">
-                  <h5 class="m-0">{{ index + 1 }}.</h5>
-                  <p class="m-0 text-dark flex-grow-1">Aktifitas {{ item.level_user }}</p>
-                  <p @click="updateAktifitas(item.id)" v-if="item.read == 'false'" class="m-0 border-bottom fs-6">Marks read</p>
-                </div>
-                <div class="d-flex flex-column gap-3 p-2 mt-3" style="background-color: rgba(0, 0, 0, 0.03)">
+            <div class="overflow-auto h-100" style="max-height: 500px">
+              <div v-for="(item, index) in rowAktifitas.items" :key="index" class="py-2 p-3 bg-label-info d-flex gap-3 align-items-start">
+                <div class="d-flex flex-column p-3 bg-white flex-grow-1">
                   <div class="d-flex gap-2 align-items-center">
-                    <div class="overflow-hidden" style="height: 28px; width: 28px; border-radius: 100px">
-                      <div class="h-100 w-100 bg-asset" :style="{ background: `url(${urlApi + item.cover_user})` }"></div>
-                    </div>
-                    <h6 class="m-0 text-black">{{ item.nama_user }}</h6>
+                    <h5 class="m-0">{{ index + 1 }}.</h5>
+                    <p class="m-0 text-dark flex-grow-1">Aktifitas {{ item.level_user }}</p>
+                    <p @click="updateAktifitas(item.id)" v-if="item.read == 'false'" class="m-0 border-bottom fs-6">Marks read</p>
                   </div>
-                  <p class="m-0 text-dark">{{ item.nama_aktifitas }}</p>
+                  <div class="d-flex flex-column gap-3 p-2 mt-3" style="background-color: rgba(0, 0, 0, 0.03)">
+                    <div class="d-flex gap-2 align-items-center">
+                      <div class="overflow-hidden" style="height: 28px; width: 28px; border-radius: 100px">
+                        <div class="h-100 w-100 bg-asset" :style="{ background: `url(${urlApi + item.cover_user})` }"></div>
+                      </div>
+                      <h6 class="m-0 text-black">{{ item.nama_user }}</h6>
+                    </div>
+                    <p class="m-0 text-dark">{{ item.nama_aktifitas }}</p>
+                  </div>
                 </div>
+                <div v-if="item.read == 'false'" class="bg-success flex-grow-1" style="height: 16px; min-width: 16px; border-radius: 100%"></div>
               </div>
-              <div v-if="item.read == 'false'" class="bg-success flex-grow-1" style="height: 16px; min-width: 16px; border-radius: 100%"></div>
             </div>
             <div class="card-footer"></div>
           </div>

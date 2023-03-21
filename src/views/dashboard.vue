@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, onMounted, ref } from 'vue';
-import Icons from '../../components/Icons.vue';
-import ProfileTop from '../../components/ProfileTop.vue';
-import { apiClient } from '../../api/axios-config';
-import Timer from '../../components/Timer.vue';
+import ProfileTop from '../components/ProfileTop.vue';
+import { apiClient } from '../api/axios-config';
+import Timer from '../components/Timer.vue';
 let toggleLoadTransaksi = ref(false);
+let loadDataDashboard = ref(false);
 let rowTransaksiDateNow = reactive({
   items: [],
 });
@@ -15,6 +15,8 @@ let rowTransaksiMonthNow = reactive({
   items: [],
 });
 let rowTransaksiWeekNow = reactive({
+  startWeek: '',
+  endWeek: '',
   items: [],
 });
 let rowTransaksi = reactive({
@@ -24,36 +26,47 @@ let dataTransaksi = reactive({
   hariIni: 0,
   bulanIni: 0,
   mingguIni: 0,
+  all: 0,
 });
 
 let date = new Date();
-let dateWeek = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - date.getDay()}`;
 let dateNow = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-let monthNow = `${date.getFullYear()}-${date.getMonth()}-0`;
-
+let monthNow = `${date.getFullYear()}-${date.getMonth() + 1}-0`;
 const getTransaksi = async () => {
+  loadDataDashboard.value = true;
   toggleLoadTransaksi.value = true;
-  let { data } = await apiClient.get(`/invoice`);
+  let { data } = await apiClient.get(`/pesanan`);
   rowTransaksi.items = data.data;
+  dataTransaksi.all = 0;
+  rowTransaksi.items.map((item) => {
+    dataTransaksi.all += parseInt(item.total_harga);
+  });
   setTimeout(() => {
     toggleLoadTransaksi.value = false;
+    loadDataDashboard.value = false;
   }, 500);
 };
 const getTransaksiDateNow = async () => {
+  loadDataDashboard.value = true;
   toggleLoadTransaksi.value = true;
-  let { data } = await apiClient.get(`/invoice/byDate/${dateNow}`);
+  let { data } = await apiClient.get(`/pesanan/byDate/${dateNow}`);
   rowTransaksiDateNow.items = data.data;
+  loadDataDashboard.value = false;
   dataTransaksi.hariIni = 0;
   rowTransaksiDateNow.items.map((item) => {
     dataTransaksi.hariIni += parseInt(item.total_harga);
   });
   setTimeout(() => {
     toggleLoadTransaksi.value = false;
+    loadDataDashboard.value = false;
   }, 500);
 };
 const getTransaksiWeekNow = async () => {
   toggleLoadTransaksi.value = true;
-  let { data } = await apiClient.get(`/invoice/byDate/${dateWeek}`);
+  loadDataDashboard.value = true;
+  let { data } = await apiClient.get(`/pesanan/pesananWeek`);
+  rowTransaksiWeekNow.startWeek = data.startWeek;
+  rowTransaksiWeekNow.endWeek = data.endWeek;
   rowTransaksiWeekNow.items = data.data;
   dataTransaksi.mingguIni = 0;
   rowTransaksiWeekNow.items.map((item) => {
@@ -61,17 +74,20 @@ const getTransaksiWeekNow = async () => {
   });
   setTimeout(() => {
     toggleLoadTransaksi.value = false;
+    loadDataDashboard.value = false;
   }, 500);
 };
 const getTransaksiMonthNow = async () => {
   toggleLoadTransaksi.value = true;
-  let { data } = await apiClient.get(`/invoice/byDate/${monthNow}`);
+  loadDataDashboard.value = true;
+  let { data } = await apiClient.get(`/pesanan/byDate/${monthNow}`);
   rowTransaksiMonthNow.items = data.data;
   dataTransaksi.bulanIni = 0;
   rowTransaksiMonthNow.items.map((item) => {
     dataTransaksi.bulanIni += parseInt(item.total_harga);
   });
   setTimeout(() => {
+    loadDataDashboard.value = false;
     toggleLoadTransaksi.value = false;
   }, 500);
 };
@@ -98,7 +114,7 @@ let onSelectTransaksi = (e) => {
 let messageDate = ref('');
 let onChangeDate = async (e) => {
   toggleLoadTransaksi.value = true;
-  const { data } = await apiClient.get(`/invoice/date/${e.target.value}`);
+  const { data } = await apiClient.get(`/pesanan/date/${e.target.value}`);
   rowTransaksiDate.items = data.data;
   selectTransaksi = rowTransaksiDate;
   messageDate.value = e.target.value;
@@ -110,6 +126,9 @@ onMounted(() => {
   getTransaksiWeekNow();
   getTransaksiMonthNow();
 });
+function addCommas(num) {
+  return num.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+}
 </script>
 <template>
   <ProfileTop />
@@ -120,8 +139,14 @@ onMounted(() => {
         <div class="row">
           <div class="col-9">
             <div class="d-flex align-items-center align-self-start">
-              <h3 class="mb-0">Rp {{ dataTransaksi.bulanIni }}.000</h3>
-              <p class="text-success ml-2 mb-0 font-weight-medium">+11%</p>
+              <div v-if="loadDataDashboard" class="placeholder-glow w-100">
+                <div class="d-flex gap-3">
+                  <span class="placeholder col-8"></span>
+                  <span class="placeholder col-1"></span>
+                </div>
+                <span class="placeholder col-6"></span>
+              </div>
+              <h3 v-else class="mb-0">Rp {{ addCommas(dataTransaksi.all) }}</h3>
             </div>
           </div>
           <div class="col-3">
@@ -139,8 +164,17 @@ onMounted(() => {
         <div class="row">
           <div class="col-9">
             <div class="d-flex align-items-center align-self-start">
-              <h3 class="text-success mb-0 font-weight-medium">+</h3>
-              <h3 class="mb-0">Rp {{ dataTransaksi.hariIni }}.000</h3>
+              <div v-if="loadDataDashboard" class="placeholder-glow w-100">
+                <div class="d-flex gap-3">
+                  <span class="placeholder col-8"></span>
+                  <span class="placeholder col-1"></span>
+                </div>
+                <span class="placeholder col-6"></span>
+              </div>
+              <div v-else class="d-flex">
+                <h3 class="text-success mb-0 font-weight-medium">+</h3>
+                <h3 class="mb-0">Rp {{ addCommas(dataTransaksi.hariIni) }}</h3>
+              </div>
             </div>
           </div>
           <div class="col-3">
@@ -155,12 +189,21 @@ onMounted(() => {
   <div class="d-flex gap-4 my-3">
     <div class="card w-100">
       <div class="card-body">
-        <h6 class="text-muted font-weight-normal">Pendapatan Minggu ini</h6>
+        <h6 class="text-muted font-weight-normal">Pendapatan Minggu ini | {{ rowTransaksiWeekNow.startWeek }} - {{ rowTransaksiWeekNow.endWeek }}</h6>
         <div class="row">
           <div class="col-9">
             <div class="d-flex align-items-center align-self-start">
-              <h3 class="text-success mb-0 font-weight-medium">+</h3>
-              <h3 class="mb-0">Rp {{ dataTransaksi.mingguIni }}.000</h3>
+              <div v-if="loadDataDashboard" class="placeholder-glow w-100">
+                <div class="d-flex gap-3">
+                  <span class="placeholder col-8"></span>
+                  <span class="placeholder col-1"></span>
+                </div>
+                <span class="placeholder col-6"></span>
+              </div>
+              <div v-else class="d-flex">
+                <h3 class="text-success mb-0 font-weight-medium">+</h3>
+                <h3 class="mb-0">Rp {{ addCommas(dataTransaksi.mingguIni) }}</h3>
+              </div>
             </div>
           </div>
           <div class="col-3">
@@ -177,8 +220,15 @@ onMounted(() => {
         <h6 class="text-muted font-weight-normal">Pendapatan Bulan Ini</h6>
         <div class="row">
           <div class="col-9">
-            <div class="d-flex align-items-center align-self-start">
-              <h3 class="mb-0">Rp {{ dataTransaksi.bulanIni }}.000</h3>
+            <div v-if="loadDataDashboard" class="placeholder-glow w-100">
+              <div class="d-flex gap-3">
+                <span class="placeholder col-8"></span>
+                <span class="placeholder col-1"></span>
+              </div>
+              <span class="placeholder col-6"></span>
+            </div>
+            <div v-else class="d-flex align-items-center align-self-start">
+              <h3 class="mb-0">Rp {{ addCommas(dataTransaksi.bulanIni) }}</h3>
               <p class="text-success ml-2 mb-0 font-weight-medium">+11%</p>
             </div>
           </div>
@@ -210,7 +260,7 @@ onMounted(() => {
         <thead>
           <tr>
             <th>No</th>
-            <th>No Meja</th>
+            <th>Status Tempat</th>
             <th>Status</th>
             <th>jumlah_pesanan</th>
             <th>total harga</th>
@@ -218,23 +268,25 @@ onMounted(() => {
             <th>Tanggal Update</th>
           </tr>
         </thead>
-        <tbody v-if="selectTransaksi.items.length == 0 && toggleLoadTransaksi == false" class="text-dark fw-bold position-relative">
-          <div class="alert alert-danger position-absolute top-0 start-50" style="transform: translate(-50%, 50%)">{{ selectTransaksi == rowTransaksiDate ? `Transaksi ${messageDate} Kosong, ` : 'Transaksi Kosong!' }} </div>
+        <tbody v-if="toggleLoadTransaksi == false && selectTransaksi.items" class="text-dark fw-bold position-relative">
+          <div class="alert alert-danger position-absolute top-0 start-50" style="transform: translate(-50%, 50%)">{{ selectTransaksi == rowTransaksiDate ? `Transaksi ${messageDate} Kosong, ` : 'Transaksi Kosong!' }}</div>
         </tbody>
         <tbody>
-          <tr v-if="toggleLoadTransaksi && selectTransaksi.items.length == 0" class="position-relative">
-            <td style="position: absolute; top: 50%; left: 50%; transform: translate(-50%)">
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading... </span>
-              </div>
-            </td>
+          <tr v-if="toggleLoadTransaksi">
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
+            <td><div class="spinner-border"></div></td>
           </tr>
 
           <tr v-else v-for="(item, index) in selectTransaksi.items" :key="index">
             <td>{{ index + 1 }}</td>
             <td>
               <h6 v-if="item.no_meja == '0'" class="text-warning m-0">Di Bawa Pulang</h6>
-              <p v-else class="m-0">{{ item.no_meja }}</p>
+              <p v-else class="m-0">Meja {{ item.no_meja }}</p>
             </td>
             <td>
               <Timer
@@ -251,7 +303,7 @@ onMounted(() => {
               />
             </td>
             <td>{{ item.jumlah_pesanan }}</td>
-            <td>Rp {{ item.total_harga }}.000</td>
+            <td>Rp {{ addCommas(item.total_harga) }}</td>
             <td>
               {{ item.created_at }} /
               <p class="text-warning">{{ item.created_at_time }}</p>

@@ -45,14 +45,14 @@ let x = setInterval(function () {
       toggleBtnAlert.value = true;
     } else {
       toggleBtnAlert.value = false;
-      timer.value = 'wees Moleee';
+      timer.value = 'SUDAH PULANG';
     }
   }
 }, 1000);
 
 const updateTime = async (id) => {
   if (props.eWaktu == 'true') {
-    const { data } = await apiClient.post(`/invoice/${id}?_method=PUT`, formTimer);
+    const { data } = await apiClient.post(`/pesanan/${id}?_method=PUT`, formTimer);
     swal({
       icon: 'success',
       title: 'Waktu Berhasil DI Tambah',
@@ -63,9 +63,9 @@ const updateTime = async (id) => {
   }
 };
 
-const emit = defineEmits(['refreshTable']);
+const emit = defineEmits(['refresh-table']);
 const goHome = async () => {
-  await apiClient.post(`/invoice/updateEkstra/${props.idInvoice}`, formGoHome);
+  await apiClient.post(`/pesanan/updateEkstra/${props.idInvoice}`, formGoHome);
   apiClient.post(`/meja/${props.noMeja}?_method=PUT`, props.noMeja);
   toggleModalAddTime.value = false;
   emit('refresh-table', true);
@@ -104,7 +104,7 @@ const goHome = async () => {
                 <button type="button" class="btn btn-outline-secondary w-100" @click="toggleModalAddTime = false">Kembali</button>
                 <button @click="updateTime(props.idInvoice)" type="button" class="btn w-100 btn-primary">Tambahkan Sekarang</button>
               </div>
-              <button class="btn btn-danger w-100" @click="goHome">PULANG AJA</button>
+              <button class="btn btn-danger w-100" @click="goHome">PULANG</button>
             </div>
           </div>
         </div>

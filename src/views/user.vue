@@ -1,18 +1,18 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
-import { apiClient, urlApi } from '../../api/axios-config';
-import ProfileTop from '../../components/ProfileTop.vue';
+import { apiClient, urlApi } from '../api/axios-config';
+import ProfileTop from '../components/ProfileTop.vue';
 import swal from 'sweetalert';
-import Icons from '../../components/Icons.vue';
+import Icons from '../components/Icons.vue';
 let toggleModalAddUser = ref(false);
 let toggleLoadUser = ref(false);
 let togglePass = ref(true);
+let waitAddUser = ref(false);
 let rowUser = reactive({
   items: [],
 });
 
 let user = JSON.parse(localStorage.getItem('user_data'));
-
 let formAddUser = reactive({
   id_user: '',
   name: '',
@@ -37,6 +37,7 @@ const getUser = async () => {
   }, 500);
 };
 const addUser = async () => {
+  waitAddUser.value = true;
   const fields = new FormData();
   fields.append('id_user', formAddUser.id_user);
   fields.append('name', formAddUser.name);
@@ -49,6 +50,7 @@ const addUser = async () => {
       icon: 'warning',
       title: 'Gambar User Wajib Di isi',
     });
+    waitAddUser.value = false;
   } else {
     let { data } = await apiClient.post('/user', fields);
     if (data.status) {
@@ -57,12 +59,14 @@ const addUser = async () => {
         title: `User ${formAddUser.name} berhasil di tambahkan`,
       });
       toggleModalAddUser.value = false;
+      waitAddUser.value = false;
       getUser();
     } else {
       swal({
         icon: 'warning',
         title: `Email Sudah Terdaftar`,
       });
+      waitAddUser.value = false;
     }
   }
 };
@@ -74,6 +78,29 @@ const deleteUser = async (id) => {
     dangerMode: true,
   });
   getUser();
+};
+
+let changeUpdateStatus = reactive({
+  status: '',
+});
+let updateStatusUser = async (id, status) => {
+  let finalStatus = (changeUpdateStatus.status = status);
+  if (finalStatus == 'true') {
+    changeUpdateStatus.status = 'false';
+  } else {
+    changeUpdateStatus.status = 'true';
+  }
+  let { data } = await apiClient.post(`/user/update-status/${id}?_method=PUT`, changeUpdateStatus);
+  if (data.status) {
+    swal({
+      icon: 'success',
+      title: 'Berhasil',
+      text: 'User Berhasil di update',
+    });
+    getUser();
+  } else {
+    console.log('salah');
+  }
 };
 
 let urlImg = ref('/src/assets/img/emptyImage.svg');
@@ -138,14 +165,18 @@ onMounted(() => {
               <img v-if="item.cover == null" src="/src/assets/img/emptyImage.svg" class="img-fluid" style="width: 50px; padding: 5px" />
               <img v-else :src="urlApi + item.cover" class="img-fluid" :alt="urlApi + item.cover" style="width: 50px; padding: 5px" />
             </td>
-            <td><span class="badge bg-label-primary me-1">Active</span></td>
             <td>
-              <div class="dropdown">
+              <span class="badge" :class="item.status == 'true' ? 'bg-label-primary' : 'bg-label-danger'"> {{ item.status == 'true' ? 'Active' : 'NonActive' }} </span>
+            </td>
+            <td>
+              <div v-if="user.email == item.email" class="badge bg-label-primary">Login Saat ini</div>
+              <div v-else class="dropdown">
                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                   <i class="bx bx-dots-vertical-rounded"></i>
                 </button>
                 <div class="dropdown-menu">
                   <button class="dropdown-item" @click="deleteUser(item.id)"><i class="bx bx-trash me-1"></i> Delete</button>
+                  <button v-if="item.email !== user.email" class="dropdown-item" @click="updateStatusUser(item.id, item.status)">{{ item.status == 'true' ? 'Nonaktifkan' : 'Aktifkan' }}</button>
                 </div>
               </div>
             </td>
@@ -201,7 +232,15 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="modal-footer"><button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Reset</button><button type="submit" class="btn btn-primary">Save changes</button></div>
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Reset</button>
+          <div>
+            <button v-if="waitAddUser" type="button" class="btn btn-primary">
+              <div class="spinner-border"></div>
+            </button>
+            <button v-else type="submit" class="btn btn-primary">Tambah User</button>
+          </div>
+        </div>
       </form>
     </div>
   </div>

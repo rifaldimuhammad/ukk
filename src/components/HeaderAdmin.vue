@@ -9,14 +9,14 @@ const getlevel = (value) => {
   const user = JSON.parse(localStorage.getItem('user_data'));
 
   if (user === null) {
-    router.push({ name: 'login' });
+    router.push({ name: 'landing' });
   } else {
     document.addEventListener('click', (e) => {
       if (document.querySelector('.btn-nav-mobile').contains(e.target)) {
-        $('.layout-menu').toggleClass('trans-0');
+        document.querySelector('#layout-menu').classList.add('trans-0');
       }
       if (!document.querySelector('.btn-nav-mobile').contains(e.target) && !document.querySelector('.layout-menu').contains(e.target)) {
-        $('.layout-menu').removeClass('trans-0');
+        document.querySelector('#layout-menu').classList.remove('trans-0');
       }
     });
     return value === user.level;
@@ -42,16 +42,17 @@ onMounted(() => {
 
     <ul class="menu-inner py-1 ps ps--active-y">
       <!-- Dashboard -->
-      <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir')">
-        <a href="" class="menu-link rounded">
-          <Icons name="kasir" fill="#697a8d" height="16px" class="pe-3" />
-          <div>Kasir</div>
-        </a>
-      </RouterLink>
+
       <RouterLink :to="{ name: 'dashboard' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir') || getlevel('admin')">
         <a href="" class="menu-link rounded">
           <Icons name="gauge" fill="#697a8d" height="16px" class="pe-3" />
           <div>Dashboard</div>
+        </a>
+      </RouterLink>
+      <RouterLink :to="{ name: 'kasir' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('kasir')">
+        <a href="" class="menu-link rounded">
+          <Icons name="kasir" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Kasir</div>
         </a>
       </RouterLink>
       <RouterLink :to="{ name: 'dashboardUser' }" active-class="active" class="menu-item" v-if="getlevel('manager') || getlevel('admin')">
@@ -76,6 +77,12 @@ onMounted(() => {
         <a href="" class="menu-link rounded">
           <Icons name="transaksi" fill="#697a8d" height="16px" class="pe-3" />
           <div>Transaksi</div>
+        </a>
+      </RouterLink>
+      <RouterLink :to="{ name: 'dashboardAktifitas' }" active-class="active" class="menu-item" v-if="getlevel('manager')">
+        <a href="" class="menu-link rounded">
+          <Icons name="activity" fill="#697a8d" height="16px" class="pe-3" />
+          <div>Aktifitas</div>
         </a>
       </RouterLink>
 

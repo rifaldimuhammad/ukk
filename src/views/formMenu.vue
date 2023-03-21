@@ -1,7 +1,7 @@
 <script setup>
-import Icons from '../../components/Icons.vue';
-import { apiClient, urlApi } from '../../api/axios-config';
-import { onMounted, reactive, ref } from 'vue';
+import Icons from '../components/Icons.vue';
+import { apiClient, urlApi } from '../api/axios-config';
+import { onMounted, reactive, ref, computed } from 'vue';
 import ProfileTop from '/src/components/ProfileTop.vue';
 import swal from 'sweetalert';
 
@@ -10,6 +10,11 @@ let togglePopupDetail = ref(false);
 let toggleSwitchImgUpdate = ref(false);
 let toggleToTable = ref(true);
 let toggleToForm = ref(false);
+let waitAddMenu = ref(false);
+let waitDeleteMenu = ref(false);
+let waitUpdateMenu = ref(false);
+let activeCat = ref('');
+
 const row = reactive({
   items: [],
 });
@@ -21,6 +26,7 @@ let dataAlert = reactive({
   message: '',
 });
 let formDataMenu = reactive({
+  id_user: '',
   nama: '',
   harga: '',
   cover: '',
@@ -28,6 +34,7 @@ let formDataMenu = reactive({
   deskripsi: '',
 });
 let dataMenuDetail = reactive({
+  id_user: '',
   id: '',
   nama: '',
   harga: '',
@@ -59,8 +66,24 @@ const getKategori = async () => {
   const { data } = await apiClient.get('/kategori');
   rowKategori.items = data.data;
 };
+const getMenuByCat = async (cat) => {
+  toggleLoadMenu.value = true;
+  activeCat.value = cat;
+  const { data } = await apiClient.get(`/menu/kategori/${cat}`);
+  row.items = data.data;
+  toggleLoadMenu.value = false;
+  if (row.items[0] == null) {
+    swal({
+      icon: 'warning',
+      title: `Menu Dengan Kategori ${cat} sedang kosong`,
+      button: true,
+    });
+    getMenu();
+  }
+};
 const getMenu = async () => {
   toggleLoadMenu.value = true;
+  activeCat.value = 'all';
   const { data } = await apiClient.get('/menu');
   row.items = data.data;
   setTimeout(() => {
@@ -68,37 +91,55 @@ const getMenu = async () => {
   }, 500);
 };
 const addMenu = async () => {
+  waitAddMenu.value = true;
+  let harga = parseFloat(formDataMenu.harga.replace(/,/g, ''));
   const fields = new FormData();
+  fields.append('id_user', formDataMenu.id_user);
   fields.append('nama', formDataMenu.nama);
-  fields.append('harga', formDataMenu.harga);
+  fields.append('harga', harga);
   fields.append('cover', formDataMenu.cover);
   fields.append('kategori', formDataMenu.kategori);
   fields.append('deskripsi', formDataMenu.deskripsi);
+  console.log(harga);
   if (formDataMenu.cover == '') {
     swal({
       title: 'Upload Gambar Menu',
       icon: 'warning',
     });
+    waitAddMenu.value = false;
   } else if (document.querySelector('#upload').files.length == 0) {
     swal({
       title: 'Upload Ulang Gambar Menu',
       icon: 'warning',
     });
+    waitAddMenu.value = false;
   } else {
     const { data } = await apiClient.post('/menu', fields);
-    toggleToForm.value = false;
-    toggleToTable.value = true;
-    swal({
-      title: 'Berhasil',
-      text: 'Menu Berhasil Di Tambahkan',
-      icon: 'success',
-      button: 'Aww yiss!',
-    });
-    getMenu();
+    if (data.status) {
+      swal({
+        title: 'Berhasil',
+        text: 'Menu Berhasil Di Tambahkan',
+        icon: 'success',
+        button: 'Ok',
+      });
+      waitAddMenu.value = false;
+      toggleToForm.value = false;
+      toggleToTable.value = true;
+      getMenu();
+    } else {
+      waitAddMenu.value = false;
+      swal({
+        title: 'Perhatikan',
+        text: 'foto menu Harus berformat gambar digital',
+        icon: 'warning',
+      });
+    }
   }
 };
 const updateMenu = async () => {
+  waitUpdateMenu.value = true;
   const fieldsEdit = new FormData();
+  fieldsEdit.append('id_user', dataMenuDetail.id_user);
   fieldsEdit.append('nama', dataMenuDetail.nama);
   fieldsEdit.append('harga', dataMenuDetail.harga);
   fieldsEdit.append('cover', dataMenuDetail.coverUpdate);
@@ -109,21 +150,35 @@ const updateMenu = async () => {
       title: 'Upload Gambar Menu',
       icon: 'warning',
     });
+    waitUpdateMenu.value = false;
   } else {
     const { data } = await apiClient.post(`/menu/${dataMenuDetail.id}?_method=PUT`, fieldsEdit);
-    togglePopupDetail.value = false;
-    toggleSwitchImgUpdate.value = false;
-
-    await swal({
-      title: 'Berhasil',
-      text: 'Menu Berhasil Di Ubah',
-      icon: 'success',
-      button: 'Aww yiss!',
-    });
-    getMenu();
+    if (data.status) {
+      togglePopupDetail.value = false;
+      toggleSwitchImgUpdate.value = false;
+      waitUpdateMenu.value = false;
+      getMenu();
+      await swal({
+        title: 'Berhasil',
+        text: 'Menu Berhasil Di Ubah',
+        icon: 'success',
+        button: 'Ok',
+      });
+    } else {
+      await swal({
+        title: 'Perhatikan',
+        text: `${data.message}`,
+        icon: 'warning',
+        button: 'Ok',
+        dangerMode: true,
+      });
+      waitUpdateMenu.value = false;
+    }
   }
 };
 const deleteMenu = async (id) => {
+  waitDeleteMenu.value = true;
+  waitDeleteMenu.value = true;
   swal({
     title: 'Yakin ?',
     text: `Apakah kamu yakin untuk menghapus menu ${dataMenuDetail.nama}  ini!`,
@@ -134,10 +189,13 @@ const deleteMenu = async (id) => {
     if (willDelete) {
       const { data } = await apiClient.delete(`/menu/${id}`);
       togglePopupDetail.value = false;
+      waitDeleteMenu.value = false;
       swal(`menu ${dataMenuDetail.nama} berhasil di hapus`, {
         icon: 'success',
       });
       getMenu();
+    } else {
+      waitDeleteMenu.value = false;
     }
   });
 };
@@ -154,13 +212,66 @@ let getImg = (e, urlVar) => {
     });
   }
 };
+
+let user = JSON.parse(localStorage.getItem('user_data'));
+if (user !== null) {
+  formDataMenu.id_user = user.id;
+  dataMenuDetail.id_user = user.id;
+}
+
+let searchQuery = ref('');
+
+let waitSearch = ref(false);
+let waitTyping;
+let doneTyping;
+
+let onSearch = async () => {
+  clearTimeout(waitTyping);
+  waitTyping = setTimeout(doneTyping, 500);
+};
+doneTyping = async () => {
+  if (searchQuery.value == ' ' || searchQuery.value == '' || searchQuery.value == null) {
+    waitSearch.value = true;
+    getMenu();
+    waitSearch.value = false;
+  } else {
+    getMenu();
+    waitSearch.value = true;
+    let { data } = await apiClient.get(`search-menu/${searchQuery.value}`);
+    row.items = data.data;
+    if (data.status) {
+      waitSearch.value = false;
+    } else {
+      waitSearch.value = false;
+    }
+  }
+};
+
 onMounted(() => {
   getMenu();
   getKategori();
 });
+
+const removeNonNumeric = (num) => num.toString().replace(/[^0-9]/g, '');
+let onChangeHarga = (value) => {
+  formDataMenu.harga = addCommas(removeNonNumeric(value.target.value));
+};
+
+function addCommas(num) {
+  return num.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+}
 </script>
 <template>
   <ProfileTop />
+  <Transition>
+    <div v-if="waitSearch" class="position-fixed top-0 start-0 h-100 w-100 d-flex align-items-center justify-content-center" style="z-index: 1">
+      <div class="d-flex gap-3 p-4 bg-white rounded align-items-center shadow">
+        <div class="spinner-border spinner-border-md bg-white"></div>
+        <p class="m-0">Mohon Tunggu</p>
+      </div>
+    </div>
+  </Transition>
+
   <h4 class="fw-bold py-3">
     <span class="text-muted fw-light"> <RouterLink class="text-muted fw-normal" :to="{ name: 'dashboard' }">Dashboard </RouterLink>/</span> Menu
   </h4>
@@ -176,7 +287,7 @@ onMounted(() => {
           <img :src="urlImg" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="border: var(--bs-secondary) solid 1px" />
           <div class="button-wrapper">
             <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
-              <span class="d-none d-sm-block">Upload new photo</span>
+              <span class="d-none d-sm-block">Upload photo</span>
               <i class="bx bx-upload d-block d-sm-none"></i>
               <input type="file" v-on:change="onInputCoverChange" name="cover" id="upload" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
             </label>
@@ -195,7 +306,7 @@ onMounted(() => {
       </div>
       <div class="mb-3">
         <label for="exampleFormControlInput1" class="form-label">Harga</label>
-        <input required type="number" name="harga" v-model="formDataMenu.harga" class="form-control" />
+        <input required type="text" name="harga" :onkeyup="onChangeHarga" :onkeydown="clearTimeout(waitTyping)" v-model="formDataMenu.harga" class="form-control" />
       </div>
       <div class="mb-3">
         <label for="exampleFormControlSelect1" class="form-label">Kategori</label>
@@ -208,21 +319,48 @@ onMounted(() => {
         <label for="exampleFormControlTextarea1" class="form-label">Deskripsi Menu</label>
         <textarea class="form-control" required type="text" name="deskripsi" v-model="formDataMenu.deskripsi" rows="3"></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">Tambahkan Menu</button>
+      <button v-if="waitAddMenu" type="button" class="btn btn-primary"><div class="spinner-border"></div></button>
+      <button v-else type="submit" class="btn btn-primary">Tambahkan Menu</button>
     </div>
   </form>
 
-  <div v-if="toggleToTable && toggleToForm == false" class="dashboard-menu">
-    <div class="menu" v-for="item in row.items">
-      <div v-if="toggleLoadMenu" class="pre-menu">
-        <div class="pre-menu-top loader-content flex flex-wrap" style="height: 10rem; width: 10rem; margin-bottom: 1rem"></div>
-        <div class="pre-menu-bot flex flex-between" style="gap: 2rem">
-          <div class="pre-menu-bot-1 loader-content" style="height: 2rem; width: 4rem"></div>
-          <div class="pre-menu-bot-2 loader-content" style="height: 2rem; width: 4rem"></div>
-        </div>
+  <div v-if="toggleToTable && toggleToForm == false" class="dashboard-menu d-flex flex-column card px-4 pb-4">
+    <div class="d-flex gap-2 align-items-center mt-4 form-control">
+      <Icons name="search" height="20px" fill="#697a8d" />
+      <input type="text" class="border-0 w-100 text-dark" placeholder="Search..." :onkeyup="onSearch" v-model="searchQuery" style="outline: none" />
+    </div>
+    <div class="overflow-auto my-4">
+      <div class="d-flex gap-3 mb-3">
+        <button @click="getMenu(), (searchQuery = '')" :class="activeCat == 'all' && 'btn-dark'" class="btn shadow-sm d-flex gap-1 align-items-center">
+          <Icons name="grid" height="20px" fill="#697a8d" />
+          <p class="m-0">All</p>
+        </button>
+        <button v-for="(item, index) in rowKategori.items" :key="index" @click="getMenuByCat(item.nama), (searchQuery = '')" :class="item.nama == activeCat && 'btn-dark'" class="btn shadow-sm d-flex gap-1 align-items-center">
+          <img :src="urlApi + item.cover" :alt="item.cover" style="height: 16px; width: 16px" />
+          <p class="m-0">{{ item.nama }}</p>
+        </button>
       </div>
-      <div v-if="toggleLoadMenu == false" class="menu-wrapper" @click="setDataMenuDetail(item.id, item.nama, item.harga, item.cover, item.kategori, item.deskripsi)">
-        <div class="menu-wrapper-img asset-bg" :style="{ background: `url(${urlApi + item.cover})` }"></div>
+    </div>
+
+    <div class="d-flex gap-3 flex-wrap">
+      <div v-if="row.items.length == 0" class="alert alert-danger">Menu yang anda Cari kosong</div>
+      <div class="menu" v-for="item in row.items">
+        <div v-if="toggleLoadMenu" class="pre-menu placeholder-glow">
+          <div class="pre-menu-top placeholder flex flex-wrap" style="height: 10rem; width: 10rem; margin-bottom: 1rem"></div>
+          <div class="pre-menu-bot flex flex-between" style="gap: 2rem">
+            <div class="pre-menu-bot-1 placeholder" style="height: 2rem; width: 4rem"></div>
+            <div class="pre-menu-bot-2 placeholder" style="height: 2rem; width: 4rem"></div>
+          </div>
+        </div>
+        <div v-if="toggleLoadMenu == false" class="menu-wrapper border" @click="setDataMenuDetail(item.id, item.nama, item.harga, item.cover, item.kategori, item.deskripsi)">
+          <div class="menu-wrapper-img asset-bg" :style="{ background: `url(${urlApi + item.cover})` }"></div>
+          <div class="d-flex flex-column gap-2">
+            <h5 class="m-0">
+              {{ item.nama }}
+            </h5>
+            <h5 class="m-0">Rp {{ addCommas(item.harga) }}</h5>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -232,7 +370,7 @@ onMounted(() => {
         <form @submit.prevent="updateMenu()" class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalCenterTitle">Modal title</h5>
-            <button @click="togglePopupDetail = false" type="button" class="btn-close"></button>
+            <button @click="(togglePopupDetail = false), (toggleSwitchImgUpdate = false)" type="button" class="btn-close"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
@@ -244,8 +382,8 @@ onMounted(() => {
                     <i class="bx bx-upload d-block d-sm-none"></i>
                     <input type="file" v-on:change="onInputCoverDetailChange" id="uploadUpdate" name="cover" class="account-file-input" hidden="" accept="image/png, image/jpeg" />
                   </label>
-                  <button @click="deleteMenu(dataMenuDetail.id)" type="button" class="btn btn-danger mb-4">
-                    <i class="bx bx-reset d-block d-sm-none"></i>
+                  <button v-if="waitDeleteMenu" class="btn btn-danger"><div class="spinner-border"></div></button>
+                  <button v-else @click="deleteMenu(dataMenuDetail.id)" type="button" class="btn btn-danger mb-4">
                     <span class="d-none d-sm-block">Hapus Menu</span>
                   </button>
 
@@ -278,7 +416,8 @@ onMounted(() => {
           </div>
           <div class="modal-footer">
             <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Reset</button>
-            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button v-if="waitUpdateMenu" type="button" class="btn btn-primary"><div class="spinner-border"></div></button>
+            <button v-else type="submit" class="btn btn-primary">Save changes</button>
           </div>
         </form>
       </div>
@@ -289,7 +428,6 @@ onMounted(() => {
 .dashboard-menu {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
   height: -webkit-fill-available;
   height: 100%;
 }
